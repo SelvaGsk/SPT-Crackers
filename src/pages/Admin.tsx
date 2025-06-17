@@ -1,0 +1,465 @@
+//@ts-nocheck
+import AdminProduct, { AddProductToShop, EditProduct } from "@/components/AdminProduct";
+import { Button } from "@/components/ui/button";
+import { useFirebase } from "@/Services/context";
+import { ArrowRight, Box, CheckCircle2, Package, Truck } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  FaCheckCircle,
+  FaTimesCircle,
+  FaHourglassHalf,
+} from "react-icons/fa";
+import { MdDeleteForever } from "react-icons/md";
+const Admin = () => {
+  const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [statusFilters, setStatusFilters] = useState({
+    orderPlaced: false,
+    payment: false,
+    shipped: false,
+    delivered: false,
+    pending: false,
+  });
+  const { getCustomerOrders,setting,getupdateCustomerOrders,getBannerUrls } = useFirebase();
+  const [toggle,setToggle] =useState(false);
+const [localSetting, setLocalSetting] = useState(null);
+
+
+  useEffect(() => {
+    const CustomerOrders = async () => {
+      const data = await getCustomerOrders();
+      const s=await getBannerUrls();
+      setLocalSetting(s);
+      if (!data) return;
+
+      const flatOrders = [];
+      for (const userId in data) {
+        for (const orderId in data[userId]) {
+          const order = data[userId][orderId];
+          flatOrders.push({
+            ...order,
+            userId,
+            orderId,
+            totalProducts: order.billProductList?.length || 0,
+          });
+        }
+      }
+
+      setOrders(flatOrders);
+      setFilteredOrders(flatOrders);
+    };
+
+    CustomerOrders();
+  }, [toggle]);
+
+  useEffect(() => {
+    const term = searchTerm.toLowerCase();
+    const filtered = orders
+      .filter(
+        (order) =>
+          order.custName?.toLowerCase().includes(term) ||
+          order.customer?.mobileNo?.toLowerCase().includes(term) ||
+          order.billNo?.toLowerCase().includes(term)
+      )
+      .filter((item) => {
+        const { orderPlaced, payment, shipped, delivered, pending } = statusFilters;
+        const s = item.statuses || {};
+        const isAnyFilterActive = orderPlaced || payment || shipped || delivered;
+
+        if (pending) return s.orderPlaced === "false";
+
+        if (!isAnyFilterActive) return true;
+
+        return (
+          (orderPlaced && s.orderPlaced === "true") ||
+          (payment && s.payment === "true") ||
+          (shipped && s.shipped === "true") ||
+          (delivered && s.delivered === "true")
+        );
+      });
+
+    setFilteredOrders(filtered);
+  }, [searchTerm, orders, statusFilters]);
+
+
+  const renderStatusIcon = (value) => {
+    if (value === "true") return <FaCheckCircle className="text-green-500" />;
+    if (value === "false") return <FaTimesCircle className="text-red-500" />;
+    return <FaHourglassHalf className="text-yellow-500" />;
+  };
+
+  const handleOrderClick = (order) => {
+    setSelectedOrder(order);
+  };
+
+  const handleBack = () => {
+    setSelectedOrder(null);
+  };
+
+  const toggleStatus = (status) => {
+    setStatusFilters((prev) => ({
+      ...prev,
+      [status]: !prev[status],
+    }));
+  };
+
+  const handleProductChange = (index, field, value) => {
+    const updated = [...selectedOrder.billProductList];
+
+  // Parse numbers safely
+  const parsedValue = (field === "qty" || field === "salesPrice") ? parseFloat(value) || 0 : value;
+
+  updated[index][field] = parsedValue;
+
+  // Recalculate totals
+  const totalAmount = updated.reduce(
+    (acc, cur) => acc + (parseFloat(cur.qty) || 0) * (parseFloat(cur.salesPrice) || 0),
+    0
+  );
+   
+  const packingCharge = (totalAmount * (localSetting[0]?.packageCharge || 0)) / 100;
+
+    console.log(totalAmount)
+    console.log(packingCharge)
+
+
+    setSelectedOrder((prev) => ({
+      ...prev,
+      billProductList: updated,
+      totalAmount,
+      packingCharge
+    }));
+  };
+
+  const handleAddressChange = (field, value) => {
+    setSelectedOrder((prev) => ({
+      ...prev,
+      deliveryAddress:value,
+      
+    }));
+  };
+  const lrnumberChange = (field, value) => {
+    // console.log(value);
+    setSelectedOrder((prev) => ({
+      ...prev,
+      lrNumber:value,
+      
+    }));
+  };
+
+
+const statusSteps = [
+  { key: "orderPlaced", label: "Order Placed", icon: <Box /> },
+  { key: "payment", label: "Payment", icon: <Package /> },
+  { key: "shipped", label: "Shipped", icon: <Truck /> },
+  { key: "delivered", label: "Delivered", icon: <CheckCircle2 /> },
+];
+  const handleAddProduct = (newProduct) => {
+    
+    const updated = [...(selectedOrder.billProductList || []), newProduct];
+    const totalAmount = updated.reduce((acc, cur) => acc + cur.qty * cur.salesPrice, 0);
+
+    setSelectedOrder((prev) => ({
+      ...prev,
+      billProductList: updated,
+      totalAmount,
+    }));
+  };
+const handelRemoveProduct = (productToRemove) => {
+  const updatedList = selectedOrder.billProductList.filter(
+    (item) => item.productId !== productToRemove.productId
+  );
+
+  // Recalculate totalAmount and packingCharge
+  const totalAmount = updatedList.reduce(
+    (acc, cur) => acc + cur.qty * cur.salesPrice,
+    0
+  );
+  const packingCharge = totalAmount * (localSetting[0]?.packageCharge || 0) / 100;
+
+  setSelectedOrder((prev) => ({
+    ...prev,
+    billProductList: updatedList,
+    totalAmount,
+    packingCharge,
+  }));
+};
+
+  const updateOrder=async()=>{
+    await getupdateCustomerOrders(selectedOrder.customer.id,selectedOrder.billNo,selectedOrder);
+    setToggle(!toggle);
+  }
+  if(!setting)
+{
+  return
+}
+
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Customer Orders</h1>
+
+      {!selectedOrder ? (
+        <>
+          <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
+            <input
+              type="text"
+              placeholder="Search by Name, Mobile No, or Bill No"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <div className="flex flex-wrap gap-2">
+              {["orderPlaced", "payment", "shipped", "delivered", "pending"].map((key) => (
+                <Button
+                  key={key}
+                  variant={statusFilters[key] ? "default" : "outline"}
+                  onClick={() => toggleStatus(key)}
+                  className="capitalize"
+                >
+                  {key}
+                </Button>
+              ))}
+            </div>
+          </div>
+          {/* <div className="flex gap-3 items-center justify-center">
+
+           <AddProductToShop/>
+           <EditProduct/>
+          </div> */}
+          <div className="overflow-x-auto shadow-md border rounded-lg">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-3">User Name</th>
+                  <th className="p-3">Mobile Number</th>
+                  <th className="p-3">Order Id</th>
+                  <th className="p-3">Date</th>
+                  <th className="p-3">Total Products</th>
+                  <th className="p-3">Amount (₹)</th>
+                  <th className="p-3">Order</th>
+                  <th className="p-3">Payment</th>
+                  <th className="p-3">Shipped</th>
+                  <th className="p-3">Delivered</th>
+                  <th className="p-3">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredOrders.map((order) => (
+                  <tr key={order.orderId} className="hover:bg-gray-50 border-t">
+                    <td className="p-3">{order.custName}</td>
+                    <td className="p-3">{order.customer?.mobileNo}</td>
+                    <td className="p-3">{order.billNo}</td>
+                    <td className="p-3">{order.date}</td>
+                    <td className="p-3">{order.totalProducts}</td>
+                    <td className="p-3">₹{order.totalAmount || 0}</td>
+                    <td className="p-3">{renderStatusIcon(order.statuses?.orderPlaced)}</td>
+                    <td className="p-3">{renderStatusIcon(order.statuses?.payment)}</td>
+                    <td className="p-3">{renderStatusIcon(order.statuses?.shipped)}</td>
+                    <td className="p-3">{renderStatusIcon(order.statuses?.delivered)}</td>
+                    <td className="p-3">
+                      <button
+                        onClick={() => handleOrderClick(order)}
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {filteredOrders.length === 0 && (
+                  <tr>
+                    <td colSpan="12" className="text-center p-4 text-gray-500">
+                      No orders found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : (
+        <div className="bg-white p-6 shadow rounded border">
+          <Button onClick={handleBack} className="mb-4">
+            ← Back to Orders
+          </Button>
+          <h2 className="text-2xl font-semibold mb-4 text-gray-700">Order Details</h2>
+            <div className="flex items-center justify-center mb-10">
+               <Button onClick={()=>updateOrder()}>Save</Button>
+            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <p><strong>Customer Name:</strong> {selectedOrder.custName}</p>
+              <p><strong>Mobile No:</strong> {selectedOrder.customer?.mobileNo}</p>
+              <p><strong>Order ID:</strong> {selectedOrder.orderId}</p>
+              <p><strong>Bill No:</strong> {selectedOrder.billNo}</p>
+            </div>
+           
+            <div>
+              <p><strong>Date:</strong> {selectedOrder.date}</p>
+              <p><strong>Total Products:</strong> {selectedOrder.totalProducts}</p>
+              <p><strong>Product Amount:</strong> ₹{selectedOrder.totalAmount || 0}</p>
+              <p><strong>PackingCharge:</strong> ₹{selectedOrder.packingCharge || 0}</p>
+              <p><strong>Total Amount:</strong> ₹{selectedOrder.packingCharge 
+              + selectedOrder.totalAmount || 0}</p>
+              <p className="mt-2">
+                <strong>Billing Address:</strong>
+                <input
+                  type="text"
+                  className="w-full border mt-1 p-2 rounded"
+                  value={selectedOrder.deliveryAddress || ""}
+                  onChange={(e) => handleAddressChange("deliveryAddress", e.target.value)}
+                />
+              </p>
+              <p className="mt-2">
+                <strong>lrNumber</strong>
+                <input
+                  type="text"
+                  className="w-full border mt-1 p-2 rounded"
+                  value={selectedOrder.lrNumber || ""}
+                  onChange={(e) => lrnumberChange("lrNumber", e.target.value)}
+                />
+              </p>
+            </div>
+          </div>
+            {/* <div>
+               {["orderPlaced", "payment", "shipped", "delivered"].map((statusKey) => (
+                        <div key={statusKey}>
+                          <label className="text-xs capitalize mr-1">{statusKey}:</label>
+                          <select
+                            className="border rounded px-1 py-0.5 text-xs"
+                            value={selectedOrder.statuses?.[statusKey] || "false"}
+                            onChange={(e) =>
+                              handleProductStatusChange(index, statusKey, e.target.value)
+                            }
+                          >
+                            <option value="true">✅</option>
+                            <option value="false">❌</option>
+                          </select>
+                        </div>
+                      ))}
+            </div> */}
+           <div className="w-full mb-6">
+  <div className="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-0 relative">
+    {statusSteps.map((step, index) => {
+      const completed = selectedOrder.statuses?.[step.key] === "true";
+      const isLast = index === statusSteps.length - 1;
+
+      return (
+        <div key={step.key} className="flex flex-col items-center flex-1 relative">
+          {/* Connecting line */}
+          {!isLast && (
+            <div className="absolute top-5 left-1/2 w-full h-1 bg-gray-300 z-0 hidden md:block">
+              <div
+                className={`h-1 ${
+                  selectedOrder.statuses?.[statusSteps[index + 1].key] === "true"
+                    ? "bg-green-500"
+                    : "bg-gray-300"
+                }`}
+                style={{ width: "100%" }}
+              />
+            </div>
+          )}
+
+          {/* Step icon */}
+          <div
+            className={`z-10 w-10 h-10 flex items-center justify-center rounded-full border-2 ${
+              completed
+                ? "bg-green-500 text-white border-green-500"
+                : "bg-white text-gray-400 border-gray-300"
+            }`}
+             onClick={() =>
+            setSelectedOrder((prev) => ({
+              ...prev,
+              statuses: {
+                ...prev.statuses,
+                [step.key]: completed ? "false" : "true",
+              },
+            }))
+          }
+          >
+            {step.icon}
+          </div>
+
+          {/* Label */}
+          <span
+            className={`mt-2 text-sm text-center font-medium ${
+              completed ? "text-green-700" : "text-gray-500"
+            }`}
+          >
+            {step.label}
+          </span>
+        </div>
+      );
+    })}
+  </div>
+</div>
+
+          <div className="overflow-y-auto">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-lg font-semibold text-gray-800">Product List</h3>
+              {/* <Button onClick={handleAddProduct} className="text-sm">+ Add Product</Button> */}
+              <AdminProduct handleAddProduct={handleAddProduct}/>
+            </div>
+            <table className="w-full table-auto text-sm overflow-x-auto overflow-y-auto">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-2">Product</th>
+                  <th className="p-2">Qty</th>
+                  <th className="p-2">Price (₹)</th>
+                  <th className="p-2">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedOrder.billProductList?.map((product, index) => (
+                  <tr key={index} className="border-t">
+                    <td className="p-2 flex items-center gap-2">
+                      {product.imageUrl && (
+                        <img src={product.imageUrl} alt="" className="w-10 h-10 rounded" />
+                      )}
+                      <input
+                        type="text"
+                        value={product.productName}
+                        className="border rounded px-2 py-1 text-sm"
+                        onChange={(e) =>
+                          handleProductChange(index, "productName", e.target.value)
+                        }
+                      />
+                    </td>
+                    <td className="p-2">
+                      <input
+                        type="number"
+                        className="w-16 border rounded p-1"
+                        value={product.qty}
+                        onChange={(e) =>
+                          handleProductChange(index, "qty", e.target.value)
+                        }
+                      />
+                    </td>
+                    <td className="p-2">
+                      <input
+                        type="number"
+                        className="w-20 border rounded p-1"
+                        value={product.salesPrice}
+                        onChange={(e) =>
+                          handleProductChange(index, "salesPrice", e.target.value)
+                        }
+                      />
+                    </td>
+                    <td className="p-2 flex gap-2 flex-wrap">
+                     <MdDeleteForever  className='text-xl text-red-500' onClick={()=>{handelRemoveProduct(product)}}/>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Admin;

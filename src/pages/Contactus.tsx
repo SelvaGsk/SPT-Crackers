@@ -1,0 +1,98 @@
+//@ts-nocheck
+
+
+import Footer from "@/components/Footer";
+import { Mail, MapPin, Phone } from "lucide-react";
+
+const Contactus = () => {
+  return (<>
+    <section className="bg-gray-50 min-h-screen pt-20 pb-16 px-4 md:px-10">
+      {/* Header Section */}
+      <div className="max-w-3xl mx-auto text-center">
+        <h1 className="text-4xl font-bold mb-4">Get in Touch</h1>
+        <p className="text-gray-600 text-lg mb-3">
+          Whether you have a question, need support, or just want to share your thoughts, we're here to help. Our team is committed to providing you with the best service possible, and your feedback is always appreciated.
+        </p>
+        <p className="text-gray-600">
+          Feel free to reach out to us using the form below or contact us via email or phone. We aim to respond to all inquiries within 24 hours during business days.
+        </p>
+      </div>
+
+      {/* Info Cards */}
+      <div className="max-w-6xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Contact Card */}
+        <div className="bg-white rounded-xl shadow-md p-6 text-center">
+          <Phone className="mx-auto mb-3 text-emerald-500" size={32} />
+          <h3 className="text-xl font-semibold mb-2">Contact</h3>
+          <p className="text-gray-600">(+91)-8438997458</p>
+          <p className="text-gray-600">(+91)-8667742537</p>
+        </div>
+
+        {/* Mail & Website Card */}
+        <div className="bg-white rounded-xl shadow-md p-6 text-center">
+          <Mail className="mx-auto mb-3 text-emerald-500" size={32} />
+          <h3 className="text-xl font-semibold mb-2">Mail & Website</h3>
+          <p className="text-gray-600">bullsinfotechsolutions@gmail.com</p>
+          <p className="text-gray-600">www.srinivascrackers.com</p>
+        </div>
+
+        {/* Address Card */}
+        <div className="bg-white rounded-xl shadow-md p-6 text-center">
+          <MapPin className="mx-auto mb-3 text-emerald-500" size={32} />
+          <h3 className="text-xl font-semibold mb-2">Address</h3>
+          <p className="text-gray-600">39 Pettai Street, Thiruthanagal - 626130.</p>
+        </div>
+      </div>
+      {/* Map & Contact Form Section */}
+<div className="max-w-6xl mx-auto mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
+  {/* Google Map Embed */}
+  <div className="w-full h-[400px]">
+    <iframe
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2992.184120534329!2d-93.64845572498043!3d42.030381071206315!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87ee726efad8798f%3A0xe622dd8ac1ddcb18!2sWorkiva!5e0!3m2!1sen!2sin!4v1718129386272!5m2!1sen!2sin"
+      width="100%"
+      height="100%"
+      style={{ border: 0 }}
+      allowFullScreen={true}
+      loading="lazy"
+      referrerPolicy="no-referrer-when-downgrade"
+    ></iframe>
+  </div>
+
+  {/* Contact Form */}
+  <form className="space-y-4">
+    <input
+      type="text"
+      placeholder="Full Name"
+      className="w-full p-3 border border-gray-300 rounded-md"
+    />
+    <input
+      type="email"
+      placeholder="Email"
+      className="w-full p-3 border border-gray-300 rounded-md"
+    />
+    <input
+      type="tel"
+      placeholder="Phone"
+      className="w-full p-3 border border-gray-300 rounded-md"
+    />
+    <textarea
+      rows={5}
+      placeholder="Message"
+      className="w-full p-3 border border-gray-300 rounded-md resize-none"
+    ></textarea>
+    <button
+      type="submit"
+      className="px-6 py-3 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition"
+    >
+      Submit
+    </button>
+  </form>
+</div>
+
+    </section>
+    <Footer/>
+    </>
+  );
+};
+
+export default Contactus;

@@ -66,7 +66,7 @@ const Register = ({ isDialog = false }) => {
       <div className="max-w-lg w-full bg-white shadow-lg rounded-lg p-8">
         {!isDialog && (
           <div className="text-center mb-6">
-            <img src="/logo.png" alt="Srinivas Crackers" className="mx-auto h-20" />
+            <img src="/logo.png" alt="SPT Crackers" className="mx-auto h-20" />
           </div>
         )}
 

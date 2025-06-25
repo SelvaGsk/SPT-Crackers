@@ -6,7 +6,7 @@ import SubNav from "./components/nav/SubNav"
 import Login from "./pages/Login"
 import OrderTrack from "./pages/OrderTrack"
 import AboutUs from "./pages/AboutUs"
-import Contactus from "./pages/Contactus"
+import ContactUsPage  from "./pages/Contactus"
 import Shop from "./pages/Shop"
 import Cart from "./pages/Cart"
 import WishList from "./pages/WishList"
@@ -98,8 +98,10 @@ const App = () => {
   };
 
   const openWhatsApp = () => {
-    const phone = `91${setting[0]?.CellNO}`;
+    const phoneRaw = setting[0]?.CellNO || '';
+    const phone = phoneRaw.replace(/\s+/g, ''); // Removes all spaces
     const message = encodeURIComponent("Hi! I want to inquire about your products.");
+    // console.log( `https://wa.me/${phone}?text=${message}`);
     window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
   };
 
@@ -113,7 +115,7 @@ const App = () => {
         <Route path='/login' element={<Login />} />
         <Route path='/track-order' element={<OrderTrack />} />
         <Route path='/aboutus' element={<AboutUs />} />
-        <Route path='/contactus' element={<Contactus />} />
+        <Route path='/Contactus' element={<ContactUsPage  />} />
         <Route path='/shop' element={<Shop />} />
         <Route path='/cart' element={<Cart />} />
         <Route path='/wishlist' element={<WishList />} />

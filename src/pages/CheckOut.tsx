@@ -38,7 +38,7 @@ const CheckOut = () => {
   } = useForm();
 
   const getPackgeCost = async () => {
-    const userRef = ref(database, `FC/Settings`);
+    const userRef = ref(database, `SPT/Settings`);
     const snapshot = await get(userRef);
     if (!snapshot.exists()) return;
     const item = snapshot.val();

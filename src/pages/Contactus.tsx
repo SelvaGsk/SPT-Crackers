@@ -3,9 +3,69 @@
 
 import Footer from "@/components/Footer";
 import { Mail, MapPin, Phone } from "lucide-react";
+import { useFirebase } from "@/Services/context";
+import { Helmet } from 'react-helmet-async';
+import { useState } from "react";
+import emailjs from "@emailjs/browser";
 
 const Contactus = () => {
+
+  const {setting}=useFirebase();
+  
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await emailjs.send(
+        "service_5t695g5",     // Replace with your actual EmailJS Service ID
+        "template_mw0d9ut",    // Replace with your actual Template ID
+        {
+          name: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+        },
+        "6xen3VaryJzQFf-BW"       // Replace with your actual Public Key
+      );
+      alert("Enquiry sent successfully!");
+
+       // ✅ Reset the form
+      setFormData({
+        fullName: "",
+        email: "",
+        phone: "",
+        message: "",
+      });
+
+    } catch (error) {
+      console.error("EmailJS Error:", error);
+      alert("Failed to send enquiry. Please try again.");
+    }
+  };
+ 
   return (<>
+   
+   <Helmet>
+      <title>Contact SPT Crackers | Sivakasi Crackers Supplier</title>
+      <meta name="description" content="Reach out to SPT Crackers for orders, queries, or wholesale deals. We're happy to help with anything related to fireworks." />
+      <meta name="keywords" content="contact sivakasi crackers, spt crackers contact, fireworks supplier phone, email crackers support" />
+      <meta property="og:title" content="Contact SPT Crackers" />
+      <meta property="og:description" content="Have questions or want to place a bulk order? Contact SPT Crackers, your fireworks expert from Sivakasi." />
+      <meta property="og:image" content="/meta/contact-us.jpg" />
+      <meta property="og:url" content="https://sptcrackers.com/contactus" />
+    </Helmet>
     <section className="bg-gray-50 min-h-screen pt-20 pb-16 px-4 md:px-10">
       {/* Header Section */}
       <div className="max-w-3xl mx-auto text-center">
@@ -24,23 +84,23 @@ const Contactus = () => {
         <div className="bg-white rounded-xl shadow-md p-6 text-center">
           <Phone className="mx-auto mb-3 text-emerald-500" size={32} />
           <h3 className="text-xl font-semibold mb-2">Contact</h3>
-          <p className="text-gray-600">(+91)-8438997458</p>
-          <p className="text-gray-600">(+91)-8667742537</p>
+          <p className="text-gray-600">{setting[0]?.CellNO}</p>
+          <p className="text-gray-600">{setting[0]?.OfficeNo}</p>
         </div>
 
         {/* Mail & Website Card */}
         <div className="bg-white rounded-xl shadow-md p-6 text-center">
           <Mail className="mx-auto mb-3 text-emerald-500" size={32} />
           <h3 className="text-xl font-semibold mb-2">Mail & Website</h3>
-          <p className="text-gray-600">bullsinfotechsolutions@gmail.com</p>
-          <p className="text-gray-600">www.srinivascrackers.com</p>
+          <p className="text-gray-600">{setting[0]?.EmailID}</p>
+          <p className="text-gray-600">www.sptcrackers.com</p>
         </div>
 
         {/* Address Card */}
         <div className="bg-white rounded-xl shadow-md p-6 text-center">
           <MapPin className="mx-auto mb-3 text-emerald-500" size={32} />
           <h3 className="text-xl font-semibold mb-2">Address</h3>
-          <p className="text-gray-600">39 Pettai Street, Thiruthanagal - 626130.</p>
+          <p className="text-gray-600">{setting[0]?.Address}</p>
         </div>
       </div>
       {/* Map & Contact Form Section */}
@@ -59,34 +119,49 @@ const Contactus = () => {
   </div>
 
   {/* Contact Form */}
-  <form className="space-y-4">
-    <input
-      type="text"
-      placeholder="Full Name"
-      className="w-full p-3 border border-gray-300 rounded-md"
-    />
-    <input
-      type="email"
-      placeholder="Email"
-      className="w-full p-3 border border-gray-300 rounded-md"
-    />
-    <input
-      type="tel"
-      placeholder="Phone"
-      className="w-full p-3 border border-gray-300 rounded-md"
-    />
-    <textarea
-      rows={5}
-      placeholder="Message"
-      className="w-full p-3 border border-gray-300 rounded-md resize-none"
-    ></textarea>
-    <button
-      type="submit"
-      className="px-6 py-3 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition"
-    >
-      Submit
-    </button>
-  </form>
+  <form onSubmit={handleSubmit} className="space-y-4">
+      <input
+        type="text"
+        name="fullName"
+        placeholder="Full Name"
+        value={formData.fullName}
+        onChange={handleChange}
+        className="w-full p-3 border border-gray-300 rounded-md"
+        required
+      />
+      <input
+        type="email"
+        name="email"
+        placeholder="Email"
+        value={formData.email}
+        onChange={handleChange}
+        className="w-full p-3 border border-gray-300 rounded-md"
+        required
+      />
+      <input
+        type="tel"
+        name="phone"
+        placeholder="Phone"
+        value={formData.phone}
+        onChange={handleChange}
+        className="w-full p-3 border border-gray-300 rounded-md"
+      />
+      <textarea
+        name="message"
+        rows={5}
+        placeholder="Message"
+        value={formData.message}
+        onChange={handleChange}
+        className="w-full p-3 border border-gray-300 rounded-md resize-none"
+        required
+      ></textarea>
+      <button
+        type="submit"
+        className="px-6 py-3 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition"
+      >
+        Send Enquiry
+      </button>
+    </form>
 </div>
 
     </section>

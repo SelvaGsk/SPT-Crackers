@@ -157,7 +157,7 @@ export const AddProductToShop = () => {
   useEffect(()=>{
            
          const getCatagory=async()=>{
-                const orderRef = ref(database, `FC/GeneralMaster`);
+                const orderRef = ref(database, `SPT/GeneralMaster`);
                     const snapshot = await get(orderRef);
                     console.log(snapshot.val());
                     setGeneralMaster(snapshot.val())
@@ -207,7 +207,7 @@ export const AddProductToShop = () => {
         id: ProductdbId,
       };
 
-      const productRef = dbRef(database, `FC/Products/${ProductdbId}`);
+      const productRef = dbRef(database, `SPT/Products/${ProductdbId}`);
       await set(productRef, finalData);
 
       toast.success("Product added successfully!");
@@ -582,7 +582,7 @@ export const EditProduct=()=>{
   useEffect(()=>{
            
          const getCatagory=async()=>{
-                const orderRef = ref(database, `FC/GeneralMaster`);
+                const orderRef = ref(database, `SPT/GeneralMaster`);
                     const snapshot = await get(orderRef);
                     console.log(snapshot.val());
                     setGeneralMaster(snapshot.val())
@@ -635,7 +635,7 @@ const [imageFile, setImageFile] = useState(null);
         ...selectedProduct,
         productImageURL: imageUrl?imageUrl:selectedProduct.productImageURL,
       };
-     const productRef = dbRef(database, `FC/Products/${selectedProduct.id}`);
+     const productRef = dbRef(database, `SPT/Products/${selectedProduct.id}`);
      await set(productRef, finalData);
 
       toast.success("Product added successfully!");

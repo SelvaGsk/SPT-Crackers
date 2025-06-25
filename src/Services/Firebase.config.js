@@ -10,14 +10,22 @@ import { getStorage } from "firebase/storage";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyBfY0rbRBWi3L6bm1DJ99htoOOPrhD0jgw",
-  authDomain: "bullsstoreeasy-45b70.firebaseapp.com",
-  databaseURL: "https://bullsstoreeasy-45b70-default-rtdb.firebaseio.com",
-  projectId: "bullsstoreeasy-45b70",
-  storageBucket: "bullsstoreeasy-45b70.appspot.com",
-  messagingSenderId: "902555612373",
-  appId: "1:902555612373:web:232bdef53cad1a68545e5c",
-  measurementId: "G-3YZ9GT0JSE"
+  apiKey: "AIzaSyBYqzHGq6prRpleFbYC4dj9Sb7iQsc9dB4",
+  authDomain: "spt-crackers.firebaseapp.com",
+  databaseURL: "https://spt-crackers-default-rtdb.firebaseio.com",
+  projectId: "spt-crackers",
+  storageBucket: "spt-crackers.firebasestorage.app",
+  messagingSenderId: "762955873779",
+  appId: "1:762955873779:web:2e9b9009ec25d93ba6e686",
+  measurementId: "G-HQYC06ZTWV"
+  // apiKey: "AIzaSyBfY0rbRBWi3L6bm1DJ99htoOOPrhD0jgw",
+  // authDomain: "bullsstoreeasy-45b70.firebaseapp.com",
+  // databaseURL: "https://bullsstoreeasy-45b70-default-rtdb.firebaseio.com",
+  // projectId: "bullsstoreeasy-45b70",
+  // storageBucket: "bullsstoreeasy-45b70.appspot.com",
+  // messagingSenderId: "902555612373",
+  // appId: "1:902555612373:web:232bdef53cad1a68545e5c",
+  // measurementId: "G-3YZ9GT0JSE"
 };
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);

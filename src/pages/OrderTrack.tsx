@@ -15,6 +15,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Helmet } from 'react-helmet-async';
 
 const statusSteps = [
   { key: "orderPlaced", label: "Order Placed", icon: <Box /> },
@@ -38,7 +39,7 @@ const OrderTrack = () => {
 
    useEffect(() => {
       if (!user) return;
-      const cartRef = ref(database, `FC/CustomerOrder/${user.uid}`);
+      const cartRef = ref(database, `SPT/CustomerOrder/${user.uid}`);
       const unsubscribe = onValue(cartRef, (snapshot) => {
         setOrders(snapshot.exists() ? snapshot.val() : {});
       });
@@ -47,6 +48,15 @@ const OrderTrack = () => {
 
   return (
     <>
+      <Helmet>
+        <title>Track Your Order | SPT Crackers Online</title>
+        <meta name="description" content="Track your SPT Crackers order in real-time. Get shipping status and delivery updates instantly." />
+        <meta name="keywords" content="track crackers order, fireworks delivery status, order tracking sivakasi, spt crackers shipping" />
+        <meta property="og:title" content="Track Your SPT Crackers Order" />
+        <meta property="og:description" content="Easily track your fireworks order placed at SPT Crackers. Quick delivery from Sivakasi." />
+        <meta property="og:image" content="/meta/track-order.jpg" />
+        <meta property="og:url" content="https://sptcrackers.com/track-order" />
+      </Helmet>
       <section className="min-h-screen bg-gray-50 p-4">
         <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-2xl p-6 md:p-10 space-y-10">
           <h2 className="text-3xl font-bold text-center text-gray-800">

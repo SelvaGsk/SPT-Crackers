@@ -17,6 +17,7 @@ import {
   PaginationLink
 } from "@/components/ui/pagination";
 import toast from "react-hot-toast";
+import { Helmet } from 'react-helmet-async';
 
 // const TAGS = ['Best Selling', 'New Arrival', 'Recommended', 'Childrens Items', 'Popular Items'];
 const SORT_OPTIONS = {
@@ -34,14 +35,25 @@ export const ProductCard = React.memo(({ product }) => {
   const qty = currentProduct?.qty || 0;
 
   return (
+    <>
+    <Helmet>
+      <title>Shop Crackers Online | SPT Crackers Sivakasi</title>
+      <meta name="description" content="Explore our wide collection of fireworks including ground chakkars, sparklers, rockets, and more. All at unbeatable Sivakasi prices." />
+      <meta name="keywords" content="crackers shop, buy fireworks, diwali crackers online, sivakasi fireworks, sparklers, rockets, flower pots, crackers deals" />
+      
+      <meta property="og:title" content="Shop Crackers at Cheapest Price from Sivakasi" />
+      <meta property="og:description" content="Premium Sivakasi crackers at wholesale price. Shop safe and eco-friendly fireworks online now!" />
+      <meta property="og:image" content="/meta/shop-banner.jpg" />
+      <meta property="og:url" content="https://sptcrackers.com/shop" />
+    </Helmet>
     <div className="bg-white rounded-xl shadow hover:shadow-md transition p-4 flex flex-col">
       <img src={product?.productImageURL} alt={product.productName} className="rounded-md h-[250px] w-full object-cover mb-3" />
       <div className="text-center mb-2">
         <p className="text-sm text-gray-500">{product.productName}</p>
       </div>
       <div className="text-center mb-2">
-        <span className="text-emerald-600 font-bold mr-2">₹{product.salesPrice?.toFixed(2)}</span>
-        <span className="text-red-500 line-through">₹{product.beforeDiscPrice?.toFixed(2)}</span>
+        <span className="text-red-500 line-through">₹{product.beforeDiscPrice?.toFixed(2)} </span>
+        <span className="text-emerald-600 font-bold mr-2">₹{product.salesPrice?.toFixed(2)} </span>
       </div>
       <div className="mt-auto flex justify-between items-center">
         {product.youtubeURL && <button><FaYoutube className="text-red-500 text-3xl cursor-pointer" /></button>}
@@ -70,7 +82,10 @@ export const ProductCard = React.memo(({ product }) => {
         </button>
       </div>
     </div>
+    </>
   );
+
+  <Footer/>
 });
 
 export const ProductTableRow = React.memo(({ product }) => {
@@ -80,11 +95,13 @@ export const ProductTableRow = React.memo(({ product }) => {
   const qty = currentProduct?.qty || 0;
 
   return (
-    <tr className="border-b">
-      <td className="p-2"><img src={product.productImageURL} alt="" className="w-20 h-20 object-cover rounded-md" /></td>
-      <td className="p-2">{product.productName}</td>
-      <td className="p-2">₹{product.salesPrice?.toFixed(2)}</td>
-      <td className="p-2">
+    <tr className="border-b">  
+    {/* className="border-b"> */}
+      <td className="p-2 w-[15px] lg:w-[90px]"><img src={product.productImageURL} alt="" className="w-15 h-15 object-cover rounded-md" /></td>
+      <td className="p-2 w-[60px] lg:w-[120px]">{product.productName}</td>
+      <td className="p-2 w-[30px] lg:w-[90px] text-red-500 line-through">₹{product.beforeDiscPrice?.toFixed(2)}</td>
+      <td className="p-2 w-[30px] lg:w-[90px]">₹{product.salesPrice?.toFixed(2)}</td>
+      <td className="p-2 w-[30px] lg:w-[90px]">
         {qty > 0 ? (
           <div className="flex items-center gap-2">
             <button onClick={() => updateCartQty(product.productId, "dec")} className="px-2 py-1 bg-red-500 text-white rounded">−</button>
@@ -101,16 +118,18 @@ export const ProductTableRow = React.memo(({ product }) => {
           <Button className="bg-green-500 text-white text-sm" onClick={() => toggleCart(product)}>Add</Button>
         )}
       </td>
-      <td className="p-2 text-center">
+      {/* <td className="p-2 text-center">
         <button onClick={() => {
           toggleWishList(product.id);
           toast.success(isInWishlist ? 'Product is removed from wishlist' : 'Product is added to wishlist')
         }}>
           {isInWishlist ? <FaHeart className="text-xl text-red-500" /> : <CiHeart className="text-2xl" />}
         </button>
-      </td>
+      </td> */}
     </tr>
   );
+  <Footer/>
+
 });
 
 const Shop = () => {
@@ -305,15 +324,17 @@ const Shop = () => {
           ))}
         </div>
       ) : (
-        <div className="overflow-auto bg-white rounded shadow">
-          <table className="w-full text-left min-w-[600px]">
-            <thead className="bg-gray-100 text-sm uppercase">
+       <div className="w-full overflow-x-auto">
+        <div className="min-w-full inline-block align-middle bg-white rounded shadow">
+          <table className="min-w-[700px] table-auto w-full text-left text-sm">
+            <thead className="bg-gray-100 uppercase text-xs">
               <tr>
-                <th className="p-2">Image</th>
-                <th className="p-2">Name</th>
-                <th className="p-2">Price</th>
-                <th className="p-2">Cart</th>
-                <th className="p-2 text-center">Wishlist</th>
+                <th className="p-2 w-[30px] lg:w-[120px]">Image</th>
+                <th className="p-2 w-[60px] lg:w-[120px]">Name</th>
+                <th className="p-2 w-[30px] lg:w-[100px]">MRP</th>
+                <th className="p-2 w-[30px] lg:w-[100px]">Offer Rate</th>
+                <th className="p-2 w-[30px] lg:w-[100px]">Cart</th>
+                {/* <th className="p-2 text-center whitespace-nowrap">Wishlist</th> */}
               </tr>
             </thead>
             <tbody>
@@ -323,6 +344,7 @@ const Shop = () => {
             </tbody>
           </table>
         </div>
+      </div>
       )}
 
       {totalPages > 1 && (
@@ -340,7 +362,9 @@ const Shop = () => {
           </PaginationContent>
         </Pagination>
       )}
+
     </div>
+    
   );
 };
 

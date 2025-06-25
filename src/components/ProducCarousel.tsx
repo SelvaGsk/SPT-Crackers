@@ -8,39 +8,40 @@ import "swiper/css/pagination"
 
 const products = [
   {
+    title: "Twinkling Chakras",
+    offer: "90% offer",
+    image: "/products/1.jpg",
+    bgColor: "bg-purple-500",
+  },
+  {
     title: "Amazing Flower Pots",
-    offer: "50% offer",
-    image: "/products/flower-pot.png",
+    offer: "90% offer",
+    image: "/products/2.jpg",
     bgColor: "bg-red-600",
   },
   {
     title: "Blasting Bombs",
-    offer: "50% offer",
-    image: "/products/blasting-bombs.png",
+    offer: "90% offer",
+    image: "/products/3.jpg",
     bgColor: "bg-blue-400",
   },
   {
     title: "Crackling Sparklers",
-    offer: "50% offer",
-    image: "/products/sparklers.png",
+    offer: "90% offer",
+    image: "/products/4.jpg",
     bgColor: "bg-gradient-to-br from-pink-500 to-blue-400",
   },
   {
     title: "Colorful Rockets",
-    offer: "30% offer",
-    image: "/products/rockets.png",
+    offer: "90% offer",
+    image: "/products/5.jpg",
     bgColor: "bg-yellow-400",
   },
-  {
-    title: "Twinkling Chakras",
-    offer: "20% offer",
-    image: "/products/chakra.png",
-    bgColor: "bg-purple-500",
-  },
+  
   {
     title: "Diwali Combo Pack",
-    offer: "60% offer",
-    image: "/products/combo.png",
+    offer: "90% offer",
+    image: "/products/6.jpg",
     bgColor: "bg-gradient-to-r from-green-400 to-blue-500",
   },
 ]
@@ -66,16 +67,27 @@ export default function ProductCarousel() {
             <div
               className={`rounded-lg p-6 h-72 relative overflow-hidden ${product.bgColor} text-white`}
             >
-              <h2 className="text-lg font-semibold">{product.title}</h2>
-              <p className="text-green-300 text-lg mt-2">{product.offer}</p>
-              <button className="mt-4 bg-green-500 text-white px-4 py-2 rounded font-semibold shadow">
-                Shop Now
-              </button>
-              <img
+               <img
                 src={product.image}
                 alt={product.title}
-                className="absolute bottom-0 right-0 h-36 object-contain"
+                // className="absolute bottom-0 right-0 h-36 object-contain"
+                className="absolute inset-0 w-full h-full object-cover"
               />
+
+               {/* Dark Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+
+              {/* Content Overlay */}
+              <div className="relative z-10">
+                <h2 className="text-lg font-semibold">{product.title}</h2>
+                <p className="text-green-300 text-lg mt-2">{product.offer}</p>
+                <a href="/shop">
+                  <button className="mt-4 cursor-pointer bg-green-500 text-white px-4 py-2 rounded font-semibold shadow">
+                    Shop Now
+                  </button>
+                </a>
+              </div>
+             
             </div>
           </SwiperSlide>
         ))}

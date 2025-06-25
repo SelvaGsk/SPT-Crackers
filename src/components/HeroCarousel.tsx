@@ -24,6 +24,20 @@ const HeroCarousel = () => {
   useEffect(() => {
     getBannerUrls();
   }, []);
+
+  function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  
+    useEffect(() => {
+      const handleResize = () => setIsMobile(window.innerWidth < 768);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
+  
+    return isMobile;
+  }
+
+  const isMobileView = useIsMobile();
   if(!setting)
   {
     return <div className="flex items-center justify-center" >
@@ -31,8 +45,24 @@ const HeroCarousel = () => {
     </div>
   }
   return (
+    
     <Carousel setApi={setApi} opts={{ loop: true }} className="w-full">
-      <CarouselContent className="hidden md:flex">
+       <CarouselContent className="flex">
+        {(isMobileView ? setting[0]?.bannerImages2 : setting[0]?.bannerImages)?.map(
+          (url, index) => (
+        <CarouselItem key={index}>
+          <div className="w-full h-[300px] md:h-[500px]">
+            <img
+              src={url}
+              alt={`banner-${index}`}
+              className="w-full h-full object-cover rounded-md"
+            />
+          </div>
+        </CarouselItem>
+      )
+    )}
+  </CarouselContent>
+      {/* <CarouselContent className="hidden md:flex"> 
         {setting[0]?.bannerImages?.map((url, index) => (
           <CarouselItem key={index}>
             <div className="w-full h-[300px]  md:h-[500px] ">
@@ -57,9 +87,13 @@ const HeroCarousel = () => {
             </div>
           </CarouselItem>
         ))}
-      </CarouselContent>
+      </CarouselContent> */}
     </Carousel>
   );
+
+  
 };
+
+
 
 export default HeroCarousel;

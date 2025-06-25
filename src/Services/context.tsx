@@ -103,7 +103,7 @@ export const FirebaseProvider = ({ children }: FirebaseProviderProps) => {
 
   useEffect(() => {
     if (!user) return;
-    const idsRef = ref(database, `FC/Wishlist/${user.uid}`);
+    const idsRef = ref(database, `SPT/Wishlist/${user.uid}`);
     const unsubscribe = onValue(idsRef, (snapshot) => {
       const data = snapshot.val();
       setWishlistIds(data ? Object.values(data) : []);
@@ -113,7 +113,7 @@ export const FirebaseProvider = ({ children }: FirebaseProviderProps) => {
 
   useEffect(() => {
     if (!user) return;
-    const cartRef = ref(database, `FC/tempCart/${user.uid}`);
+    const cartRef = ref(database, `SPT/tempCart/${user.uid}`);
     const unsubscribe = onValue(cartRef, (snapshot) => {
       setCartItems(snapshot.exists() ? snapshot.val() : {});
     });
@@ -121,7 +121,7 @@ export const FirebaseProvider = ({ children }: FirebaseProviderProps) => {
   }, [user]);
   
  useEffect(() => {
-    const productsRef = ref(database, "FC/Products");
+    const productsRef = ref(database, "SPT/Products");
     const unsubscribe = onValue(productsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -138,7 +138,7 @@ export const FirebaseProvider = ({ children }: FirebaseProviderProps) => {
     return () => unsubscribe();
   }, []);
   useEffect(()=>{
- const TagsRef = ref(database, "FC/GeneralMaster/Tags");
+ const TagsRef = ref(database, "SPT/GeneralMaster/Tags");
     const unsubscribe = onValue(TagsRef, (snapshot) => {
       const data = snapshot.val();
      
@@ -192,7 +192,7 @@ export const FirebaseProvider = ({ children }: FirebaseProviderProps) => {
         };
 
         await set(
-          ref(database, `FC/Customers/${userCredential.user.uid}`),
+          ref(database, `SPT/Customers/${userCredential.user.uid}`),
           customerData
         );
       }
@@ -228,7 +228,7 @@ export const FirebaseProvider = ({ children }: FirebaseProviderProps) => {
         };
 
         await set(
-          ref(database, `FC/Customers/${user.uid}`),
+          ref(database, `SPT/Customers/${user.uid}`),
           customerData
         );
       toast.success("Account updated successfully!");
@@ -274,7 +274,7 @@ export const FirebaseProvider = ({ children }: FirebaseProviderProps) => {
       return;
     }
 
-    const idsRef = ref(database, `FC/Wishlist/${user.uid}`);
+    const idsRef = ref(database, `SPT/Wishlist/${user.uid}`);
     const snapshot = await get(idsRef);
     let currentIds = snapshot.exists() ? snapshot.val() : [];
 
@@ -293,7 +293,7 @@ export const FirebaseProvider = ({ children }: FirebaseProviderProps) => {
       return;
     }
 
-    const productRef = ref(database, `FC/tempCart/${user.uid}/${product.productId}`);
+    const productRef = ref(database, `SPT/tempCart/${user.uid}/${product.productId}`);
     const snapshot = await get(productRef);
 
     if (snapshot.exists()) {
@@ -313,7 +313,7 @@ const updateCartQty = async (
 ) => {
   if (!user?.uid) return;
 
-  const productRef = ref(database, `FC/tempCart/${user.uid}/${productId}`);
+  const productRef = ref(database, `SPT/tempCart/${user.uid}/${productId}`);
   const snapshot = await get(productRef);
   if (!snapshot.exists()) return;
 
@@ -336,7 +336,7 @@ const updateCartQty = async (
 
   const getUser = async () => {
     if (!user) return;
-    const userRef = ref(database, `FC/Customers/${user.uid}`);
+    const userRef = ref(database, `SPT/Customers/${user.uid}`);
     const snapshot = await get(userRef);
     return snapshot.exists() ? snapshot.val() : null;
   };
@@ -363,7 +363,7 @@ const updateCartQty = async (
       if (!user || !user.uid) return;
       const dbUser = await getUser();
       const orderId = Date.now().toString();
-      const orderRef = ref(database, `FC/CustomerOrder/${user.uid}/${orderId}`);
+      const orderRef = ref(database, `SPT/CustomerOrder/${user.uid}/${orderId}`);
 if(useExistingAddress&&!dbUser?.accounterName)
   {
     toast.error('Please update address on profile');
@@ -408,7 +408,7 @@ if(useExistingAddress&&!dbUser?.accounterName)
       for (const item of billProductList) {
         const productRef = ref(
           database,
-          `FC/tempCart/${user.uid}/${item.productId}`
+          `SPT/tempCart/${user.uid}/${item.productId}`
         );
         await remove(productRef);
       }
@@ -419,27 +419,27 @@ if(useExistingAddress&&!dbUser?.accounterName)
 
   const getOrders = async () => {
     if (!user) return;
-    const orderRef = ref(database, `FC/CustomerOrder/${user.uid}`);
+    const orderRef = ref(database, `SPT/CustomerOrder/${user.uid}`);
     const snapshot = await get(orderRef);
     return snapshot.exists() ? snapshot.val() : null;
   };
 
   const getBannerUrls = async () => {
-    const urlRef = ref(database, `FC/Settings`);
+    const urlRef = ref(database, `SPT/Settings`);
     const snapshot = await get(urlRef);
     setSetting(snapshot.exists() ? snapshot.val() : null);
     // console.log(snapshot.exists() ? snapshot.val() : null)
     return snapshot.exists() ? snapshot.val() : null;
   };
    const getCustomerOrders = async () => {
-    const coRef = ref(database, `FC/CustomerOrder`);
+    const coRef = ref(database, `SPT/CustomerOrder`);
     const snapshot = await get(coRef);
     setSetting(snapshot.exists() ? snapshot.val() : null);
     // console.log(snapshot.exists() ? snapshot.val() : null)
     return snapshot.exists() ? snapshot.val() : null;
   };
   const getupdateCustomerOrders = async (uid,orderid,data) => {
-    const coRef = ref(database, `FC/CustomerOrder/${uid}/${orderid}`);
+    const coRef = ref(database, `SPT/CustomerOrder/${uid}/${orderid}`);
      await set(coRef,data);
      toast.success('updated')
     // console.log(uid)

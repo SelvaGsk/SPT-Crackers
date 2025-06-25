@@ -13,6 +13,7 @@ import {
   FaPhoneAlt
 } from "react-icons/fa";
 import { useFirebase } from "@/Services/context";
+import { FiPhoneCall } from "react-icons/fi";
 
 export default function Footer() {
   const {setting}=useFirebase();
@@ -26,20 +27,22 @@ export default function Footer() {
         <div>
           <img src="/logo.png" alt="Logo" className="h-10 mb-4" />
           <p className="text-sm mb-4">
-            Srinivas Crackers is the biggest market of Fireworks products. Get your all favourites from our store.
+            SPT Crackers is the biggest market of Fireworks products. Get your all favourites from our store.
           </p>
           <div className="space-y-2 text-sm">
             <div className="flex items-start gap-2">
               <FaMapMarkerAlt className="text-green-600 mt-1" />
-              <span>39, Pettai Street, Thiruthangal - 626 130, Sivakasi.</span>
+              <span>{setting[0]?.Address}</span>
             </div>
             <div className="flex items-start gap-2">
               <FaEnvelope className="text-green-600 mt-1" />
-              <span>bullsinfotechsolutions@gmail.com</span>
+              <span>{setting[0]?.EmailID}</span>
             </div>
             <div className="flex items-start gap-2">
               <FaPhoneAlt className="text-green-600 mt-1" />
-              <span>+91 8438997458</span>
+              <span>{setting[0]?.CellNO}</span>
+              <FiPhoneCall className="text-green-600 mt-1" />
+                <span>{setting[0]?.OfficeNo}</span>
             </div>
           </div>
         </div>

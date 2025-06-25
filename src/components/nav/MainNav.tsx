@@ -8,6 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { FaShop } from 'react-icons/fa6';
 
 const MainNav = ({onProfileClick}) => {
   const { searchTerm, setSearchTerm, cartItems ,user,signOut} = useFirebase();
@@ -108,10 +109,10 @@ const MainNav = ({onProfileClick}) => {
           {/* Wishlist */}
           <div
             className="flex items-center gap-2 cursor-pointer"
-            onClick={() => navigate('/wishlist')}
+            onClick={() => navigate('/shop')}
           >
-            <FaHeart />
-            <span>Wishlist</span>
+            <FaShop/>
+            <span>Shop Now</span>
           </div>
 
           {/* Cart */}

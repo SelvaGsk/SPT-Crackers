@@ -87,13 +87,13 @@ const MainNav = ({onProfileClick}) => {
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                 onClick={() => navigate('/admin')}
               >
-                Admin
+                Customer Orders
               </div>
               <div
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                 onClick={() => navigate('/product-admin')}
               >
-                Product Administration
+                Product Master
               </div>
 
               <div

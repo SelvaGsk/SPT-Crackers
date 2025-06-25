@@ -94,12 +94,16 @@ const SubNav = () => {
           <FiSmartphone size={20} />
           <p className="font-semibold ml-2">{setting[0]?.OfficeNo}</p>
   </div> */}
-  <div className="flex items-center justify-end">
-    <FiPhoneCall className = "mt-1" />
-    <span className="pr-2 pl-1">{setting[0]?.CellNO}</span>
-    <FiSmartphone className = "mt-1" />
+  <div className="flex flex-col items-end space-y-1">
+  <div className="flex items-center">
+    <FiPhoneCall className="w-4 h-4 mr-1" />
+    <span>{setting[0]?.CellNO}</span>
+  </div>
+  <div className="flex items-center">
+    <FiSmartphone className="w-4 h-4 mr-1" />
     <span>{setting[0]?.OfficeNo}</span>
-   </div>
+  </div>
+</div>
   
 </div>
 

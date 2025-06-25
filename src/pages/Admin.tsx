@@ -5,6 +5,7 @@ import { useFirebase } from "@/Services/context";
 import { ArrowRight, Box, CheckCircle2, Package, Truck } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
+  FaPrint,
   FaCheckCircle,
   FaTimesCircle,
   FaHourglassHalf,
@@ -149,7 +150,73 @@ const [localSetting, setLocalSetting] = useState(null);
     }));
   };
 
+  const transportNameChange = (field, value) => {
+    // console.log(value);
+    setSelectedOrder((prev) => ({
+      ...prev,
+      transportName:value,
+      
+    }));
+  };
 
+  const handlePrint = () => {
+    const printContent = document.getElementById('print-section');
+    if (!printContent) return;
+  
+    const newWindow = window.open('', '', 'width=900,height=650');
+    if (newWindow) {
+      newWindow.document.write(`
+        <html>
+          <head>
+            <title> Order List Report</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+              th { background-color: #f2f2f2; }
+            </style>
+          </head>
+          <body>
+            <h2>Customer Orders Report</h2>
+            ${printContent.innerHTML}
+          </body>
+        </html>
+      `);
+      newWindow.document.close();
+      newWindow.focus();
+      newWindow.print();
+      newWindow.close();
+    }
+  };
+
+  const handlePrintOrderDetails = () => {
+    const printContent = document.getElementById('order-print');
+    if (!printContent) return;
+  
+    const newWindow = window.open('', '', 'width=900,height=650');
+    if (newWindow) {
+      newWindow.document.write(`
+        <html>
+          <head>
+            <title>Order Details</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              h2, h3 { margin-bottom: 10px; }
+              ul { margin-top: 10px; }
+              li { margin-bottom: 5px; }
+            </style>
+          </head>
+          <body>
+            ${printContent.innerHTML}
+          </body>
+        </html>
+      `);
+      newWindow.document.close();
+      newWindow.focus();
+      newWindow.print();
+      newWindow.close();
+    }
+  };
 const statusSteps = [
   { key: "orderPlaced", label: "Order Placed", icon: <Box /> },
   { key: "payment", label: "Payment", icon: <Package /> },
@@ -199,8 +266,16 @@ const handelRemoveProduct = (productToRemove) => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Customer Orders</h1>
-
+       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+          <h1 className="text-3xl font-bold text-gray-800">Customer Orders</h1>
+          <button
+            onClick={handlePrint}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2 w-full sm:w-auto justify-center"
+          >
+            <FaPrint className="text-white" />
+            Print Orders List
+          </button>
+        </div>
       {!selectedOrder ? (
         <>
           <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
@@ -230,235 +305,260 @@ const handelRemoveProduct = (productToRemove) => {
            <EditProduct/>
           </div> */}
           <div className="overflow-x-auto shadow-md border rounded-lg">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="p-3">User Name</th>
-                  <th className="p-3">Mobile Number</th>
-                  <th className="p-3">Order Id</th>
-                  <th className="p-3">Date</th>
-                  <th className="p-3">Total Products</th>
-                  <th className="p-3">Amount (₹)</th>
-                  <th className="p-3">Order</th>
-                  <th className="p-3">Payment</th>
-                  <th className="p-3">Shipped</th>
-                  <th className="p-3">Delivered</th>
-                  <th className="p-3">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredOrders.map((order) => (
-                  <tr key={order.orderId} className="hover:bg-gray-50 border-t">
-                    <td className="p-3">{order.custName}</td>
-                    <td className="p-3">{order.customer?.mobileNo}</td>
-                    <td className="p-3">{order.billNo}</td>
-                    <td className="p-3">{order.date}</td>
-                    <td className="p-3">{order.totalProducts}</td>
-                    <td className="p-3">₹{order.totalAmount || 0}</td>
-                    <td className="p-3">{renderStatusIcon(order.statuses?.orderPlaced)}</td>
-                    <td className="p-3">{renderStatusIcon(order.statuses?.payment)}</td>
-                    <td className="p-3">{renderStatusIcon(order.statuses?.shipped)}</td>
-                    <td className="p-3">{renderStatusIcon(order.statuses?.delivered)}</td>
-                    <td className="p-3">
-                      <button
-                        onClick={() => handleOrderClick(order)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
-                      >
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {filteredOrders.length === 0 && (
+           <div id="print-section">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-gray-100">
                   <tr>
-                    <td colSpan="12" className="text-center p-4 text-gray-500">
-                      No orders found.
-                    </td>
+                    <th className="p-3">User Name</th>
+                    <th className="p-3">Mobile Number</th>
+                    <th className="p-3">Order Id</th>
+                    <th className="p-3">Date</th>
+                    <th className="p-3">Total Products</th>
+                    <th className="p-3">Amount (₹)</th>
+                    <th className="p-3">Order</th>
+                    <th className="p-3">Payment</th>
+                    <th className="p-3">Shipped</th>
+                    <th className="p-3">Delivered</th>
+                    <th className="p-3 print:hidden">Action</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredOrders.map((order) => (
+                    <tr key={order.orderId} className="hover:bg-gray-50 border-t">
+                      <td className="p-3">{order.custName}</td>
+                      <td className="p-3">{order.customer?.mobileNo}</td>
+                      <td className="p-3">{order.billNo}</td>
+                      <td className="p-3">{order.date}</td>
+                      <td className="p-3">{order.totalProducts}</td>
+                      <td className="p-3">₹{order.totalAmount || 0}</td>
+                      <td className="p-3">{renderStatusIcon(order.statuses?.orderPlaced)}</td>
+                      <td className="p-3">{renderStatusIcon(order.statuses?.payment)}</td>
+                      <td className="p-3">{renderStatusIcon(order.statuses?.shipped)}</td>
+                      <td className="p-3">{renderStatusIcon(order.statuses?.delivered)}</td>
+                      <td className="p-3 print:hidden">
+                        <button
+                          onClick={() => handleOrderClick(order)}
+                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredOrders.length === 0 && (
+                    <tr>
+                      <td colSpan="12" className="text-center p-4 text-gray-500">
+                        No orders found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       ) : (
         <div className="bg-white p-6 shadow rounded border">
-          <Button onClick={handleBack} className="mb-4">
-            ← Back to Orders
-          </Button>
-          <h2 className="text-2xl font-semibold mb-4 text-gray-700">Order Details</h2>
-            <div className="flex items-center justify-center mb-10">
-               <Button onClick={()=>updateOrder()}>Save</Button>
+            <Button onClick={handleBack} className="mb-4">
+              ← Back to Orders
+            </Button>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-700">Order Details</h2>
+            
+              
+              <div className="flex justify-between items-center mb-4">
+                <Button onClick={()=>updateOrder()}>Save</Button>
+                <button
+                  onClick={handlePrintOrderDetails}
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2 print:hidden"
+                >
+                  <FaPrint />
+                  Print
+                </button>
+              </div>
+
+          <div id="order-print">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            
+              <div>
+                <p><strong>Customer Name:</strong> {selectedOrder.custName}</p>
+                <p><strong>Mobile No:</strong> {selectedOrder.customer?.mobileNo}</p>
+                <p><strong>Order ID:</strong> {selectedOrder.orderId}</p>
+                <p><strong>Bill No:</strong> {selectedOrder.billNo}</p>
+              </div>
+            
+              <div>
+                <p><strong>Date:</strong> {selectedOrder.date}</p>
+                <p><strong>Total Products:</strong> {selectedOrder.totalProducts}</p>
+                <p><strong>Product Amount:</strong> ₹{selectedOrder.totalAmount || 0}</p>
+                <p><strong>PackingCharge:</strong> ₹{selectedOrder.packingCharge || 0}</p>
+                <p><strong>Total Amount:</strong> ₹{selectedOrder.packingCharge 
+                + selectedOrder.totalAmount || 0}</p>
+                <p className="mt-2">
+                  <strong>Billing Address:</strong>
+                  <input
+                    type="text"
+                    className="w-full border mt-1 p-2 rounded"
+                    value={selectedOrder.deliveryAddress || ""}
+                    onChange={(e) => handleAddressChange("deliveryAddress", e.target.value)}
+                  />
+                </p>
+                <p className="mt-2">
+                  <strong>Transport Name</strong>
+                  <input
+                    type="text"
+                    className="w-full border mt-1 p-2 rounded"
+                    value={selectedOrder.transportName || ""}
+                    onChange={(e) => transportNameChange("transportName", e.target.value)}
+                  />
+                </p>
+                <p className="mt-2">
+                  <strong>LR Number</strong>
+                  <input
+                    type="text"
+                    className="w-full border mt-1 p-2 rounded"
+                    value={selectedOrder.lrNumber || ""}
+                    onChange={(e) => lrnumberChange("lrNumber", e.target.value)}
+                  />
+                </p>
+              </div>
             </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <p><strong>Customer Name:</strong> {selectedOrder.custName}</p>
-              <p><strong>Mobile No:</strong> {selectedOrder.customer?.mobileNo}</p>
-              <p><strong>Order ID:</strong> {selectedOrder.orderId}</p>
-              <p><strong>Bill No:</strong> {selectedOrder.billNo}</p>
-            </div>
-           
-            <div>
-              <p><strong>Date:</strong> {selectedOrder.date}</p>
-              <p><strong>Total Products:</strong> {selectedOrder.totalProducts}</p>
-              <p><strong>Product Amount:</strong> ₹{selectedOrder.totalAmount || 0}</p>
-              <p><strong>PackingCharge:</strong> ₹{selectedOrder.packingCharge || 0}</p>
-              <p><strong>Total Amount:</strong> ₹{selectedOrder.packingCharge 
-              + selectedOrder.totalAmount || 0}</p>
-              <p className="mt-2">
-                <strong>Billing Address:</strong>
-                <input
-                  type="text"
-                  className="w-full border mt-1 p-2 rounded"
-                  value={selectedOrder.deliveryAddress || ""}
-                  onChange={(e) => handleAddressChange("deliveryAddress", e.target.value)}
-                />
-              </p>
-              <p className="mt-2">
-                <strong>lrNumber</strong>
-                <input
-                  type="text"
-                  className="w-full border mt-1 p-2 rounded"
-                  value={selectedOrder.lrNumber || ""}
-                  onChange={(e) => lrnumberChange("lrNumber", e.target.value)}
-                />
-              </p>
-            </div>
+              {/* <div>
+                {["orderPlaced", "payment", "shipped", "delivered"].map((statusKey) => (
+                          <div key={statusKey}>
+                            <label className="text-xs capitalize mr-1">{statusKey}:</label>
+                            <select
+                              className="border rounded px-1 py-0.5 text-xs"
+                              value={selectedOrder.statuses?.[statusKey] || "false"}
+                              onChange={(e) =>
+                                handleProductStatusChange(index, statusKey, e.target.value)
+                              }
+                            >
+                              <option value="true">✅</option>
+                              <option value="false">❌</option>
+                            </select>
+                          </div>
+                        ))}
+              </div> */}
+          <div className="w-full mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-0 relative">
+              {statusSteps.map((step, index) => {
+                const completed = selectedOrder.statuses?.[step.key] === "true";
+                const isLast = index === statusSteps.length - 1;
+
+              return (
+                <div key={step.key} className="flex flex-col items-center flex-1 relative">
+                  {/* Connecting line */}
+                  {!isLast && (
+                    <div className="absolute top-5 left-1/2 w-full h-1 bg-gray-300 z-0 hidden md:block">
+                      <div
+                        className={`h-1 ${
+                          selectedOrder.statuses?.[statusSteps[index + 1].key] === "true"
+                            ? "bg-green-500"
+                            : "bg-gray-300"
+                        }`}
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Step icon */}
+                  <div
+                    className={`z-10 w-10 h-10 flex items-center justify-center rounded-full border-2 ${
+                      completed
+                        ? "bg-green-500 text-white border-green-500"
+                        : "bg-white text-gray-400 border-gray-300"
+                    }`}
+                    onClick={() =>
+                    setSelectedOrder((prev) => ({
+                      ...prev,
+                      statuses: {
+                        ...prev.statuses,
+                        [step.key]: completed ? "false" : "true",
+                      },
+                    }))
+                  }
+                  >
+                    {step.icon}
+                  </div>
+
+                  {/* Label */}
+                  <span
+                    className={`mt-2 text-sm text-center font-medium ${
+                      completed ? "text-green-700" : "text-gray-500"
+                    }`}
+                  >
+                    {step.label}
+                  </span>
+                </div>
+              );
+            })}
           </div>
-            {/* <div>
-               {["orderPlaced", "payment", "shipped", "delivered"].map((statusKey) => (
-                        <div key={statusKey}>
-                          <label className="text-xs capitalize mr-1">{statusKey}:</label>
-                          <select
-                            className="border rounded px-1 py-0.5 text-xs"
-                            value={selectedOrder.statuses?.[statusKey] || "false"}
-                            onChange={(e) =>
-                              handleProductStatusChange(index, statusKey, e.target.value)
-                            }
-                          >
-                            <option value="true">✅</option>
-                            <option value="false">❌</option>
-                          </select>
-                        </div>
-                      ))}
-            </div> */}
-           <div className="w-full mb-6">
-  <div className="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-0 relative">
-    {statusSteps.map((step, index) => {
-      const completed = selectedOrder.statuses?.[step.key] === "true";
-      const isLast = index === statusSteps.length - 1;
-
-      return (
-        <div key={step.key} className="flex flex-col items-center flex-1 relative">
-          {/* Connecting line */}
-          {!isLast && (
-            <div className="absolute top-5 left-1/2 w-full h-1 bg-gray-300 z-0 hidden md:block">
-              <div
-                className={`h-1 ${
-                  selectedOrder.statuses?.[statusSteps[index + 1].key] === "true"
-                    ? "bg-green-500"
-                    : "bg-gray-300"
-                }`}
-                style={{ width: "100%" }}
-              />
-            </div>
-          )}
-
-          {/* Step icon */}
-          <div
-            className={`z-10 w-10 h-10 flex items-center justify-center rounded-full border-2 ${
-              completed
-                ? "bg-green-500 text-white border-green-500"
-                : "bg-white text-gray-400 border-gray-300"
-            }`}
-             onClick={() =>
-            setSelectedOrder((prev) => ({
-              ...prev,
-              statuses: {
-                ...prev.statuses,
-                [step.key]: completed ? "false" : "true",
-              },
-            }))
-          }
-          >
-            {step.icon}
           </div>
-
-          {/* Label */}
-          <span
-            className={`mt-2 text-sm text-center font-medium ${
-              completed ? "text-green-700" : "text-gray-500"
-            }`}
-          >
-            {step.label}
-          </span>
-        </div>
-      );
-    })}
-  </div>
-</div>
 
           <div className="overflow-y-auto">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-semibold text-gray-800">Product List</h3>
-              {/* <Button onClick={handleAddProduct} className="text-sm">+ Add Product</Button> */}
-              <AdminProduct handleAddProduct={handleAddProduct}/>
-            </div>
-            <table className="w-full table-auto text-sm overflow-x-auto overflow-y-auto">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="p-2">Product</th>
-                  <th className="p-2">Qty</th>
-                  <th className="p-2">Price (₹)</th>
-                  <th className="p-2">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedOrder.billProductList?.map((product, index) => (
-                  <tr key={index} className="border-t">
-                    <td className="p-2 flex items-center gap-2">
-                      {product.imageUrl && (
-                        <img src={product.imageUrl} alt="" className="w-10 h-10 rounded" />
-                      )}
-                      <input
-                        type="text"
-                        value={product.productName}
-                        className="border rounded px-2 py-1 text-sm"
-                        onChange={(e) =>
-                          handleProductChange(index, "productName", e.target.value)
-                        }
-                      />
-                    </td>
-                    <td className="p-2">
-                      <input
-                        type="number"
-                        className="w-16 border rounded p-1"
-                        value={product.qty}
-                        onChange={(e) =>
-                          handleProductChange(index, "qty", e.target.value)
-                        }
-                      />
-                    </td>
-                    <td className="p-2">
-                      <input
-                        type="number"
-                        className="w-20 border rounded p-1"
-                        value={product.salesPrice}
-                        onChange={(e) =>
-                          handleProductChange(index, "salesPrice", e.target.value)
-                        }
-                      />
-                    </td>
-                    <td className="p-2 flex gap-2 flex-wrap">
-                     <MdDeleteForever  className='text-xl text-red-500' onClick={()=>{handelRemoveProduct(product)}}/>
-                    </td>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-semibold text-gray-800">Product List</h3>
+                {/* <Button onClick={handleAddProduct} className="text-sm">+ Add Product</Button> */}
+                <AdminProduct handleAddProduct={handleAddProduct}/>
+              </div>
+              <table className="w-full table-auto text-sm overflow-x-auto overflow-y-auto">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="p-2">Product</th>
+                    <th className="p-2">Qty</th>
+                    <th className="p-2">Price (₹)</th>
+                    <th className="p-2">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {selectedOrder.billProductList?.map((product, index) => (
+                    <tr key={index} className="border-t">
+                      <td className="p-2 flex items-center gap-2">
+                        {product.imageUrl && (
+                          <img src={product.imageUrl} alt="" className="w-10 h-10 rounded" />
+                        )}
+                        <input
+                          type="text"
+                          value={product.productName}
+                          className="border rounded px-2 py-1 text-sm"
+                          onChange={(e) =>
+                            handleProductChange(index, "productName", e.target.value)
+                          }
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input
+                          type="number"
+                          className="w-16 border rounded p-1"
+                          value={product.qty}
+                          onChange={(e) =>
+                            handleProductChange(index, "qty", e.target.value)
+                          }
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input
+                          type="number"
+                          className="w-20 border rounded p-1"
+                          value={product.salesPrice}
+                          onChange={(e) =>
+                            handleProductChange(index, "salesPrice", e.target.value)
+                          }
+                        />
+                      </td>
+                      <td className="p-2 flex gap-2 flex-wrap">
+                      <MdDeleteForever  className='text-xl text-red-500' onClick={()=>{handelRemoveProduct(product)}}/>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>          
           </div>
         </div>
-      )}
-    </div>
+      </div>
+        )}
+      </div>  
+    
   );
 };
 

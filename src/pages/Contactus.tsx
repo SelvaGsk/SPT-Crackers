@@ -108,7 +108,8 @@ const Contactus = () => {
   {/* Google Map Embed */}
   <div className="w-full h-[400px]">
     <iframe
-      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2992.184120534329!2d-93.64845572498043!3d42.030381071206315!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87ee726efad8798f%3A0xe622dd8ac1ddcb18!2sWorkiva!5e0!3m2!1sen!2sin!4v1718129386272!5m2!1sen!2sin"
+      src={`https://maps.google.com/maps?q=${setting[0]?.latitude},${setting[0]?.longitude}&z=15&output=embed`}
+      // src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2992.184120534329!2d-93.64845572498043!3d42.030381071206315!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87ee726efad8798f%3A0xe622dd8ac1ddcb18!2sWorkiva!5e0!3m2!1sen!2sin!4v1718129386272!5m2!1sen!2sin"
       width="100%"
       height="100%"
       style={{ border: 0 }}

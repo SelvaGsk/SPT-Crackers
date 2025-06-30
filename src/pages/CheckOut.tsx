@@ -29,13 +29,19 @@ const CheckOut = () => {
   const [useExistingAddress, setUseExistingAddress] = useState(false);
   const [formData, setFormData] = useState();
   const [showDialog, setShowDialog] = useState(false);
-
+ 
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
     reset,
   } = useForm();
+
+  const pinCode = watch("pinCode");
+  const [loadingLocation, setLoadingLocation] = useState(false);
+  const [pinError, setPinError] = useState("");
 
   const getPackgeCost = async () => {
     const userRef = ref(database, `SPT/Settings`);
@@ -53,6 +59,38 @@ const CheckOut = () => {
     getUse();
     getPackgeCost();
   }, [user]);
+
+  useEffect(() => {
+    const fetchLocation = async () => {
+      if (pinCode?.length === 6) {
+        setLoadingLocation(true);
+        setPinError("");
+        try {
+          const res = await fetch(`https://api.postalpincode.in/pincode/${pinCode}`);
+          const data = await res.json();
+          if (data[0].Status === "Success") {
+            console.log(data[0].PostOffice[0]);
+            const {Name, District, State } = data[0].PostOffice[0];
+            setValue("city", Name);
+            setValue("district", District);
+            setValue("state", State);
+          } else {
+            setPinError("Invalid PIN Code");
+            setValue("district", "");
+            setValue("state", "");
+            setValue("city", "");
+          }
+        } catch (err) {
+          setPinError("Failed to fetch location");
+          setValue("district", "");
+          setValue("state", "");
+          setValue("city", "");
+        }
+        setLoadingLocation(false);
+      }
+    };
+    fetchLocation();
+  }, [pinCode]);
 
   const checkoutItems = cartArray.filter(item => !excludedIds.includes(item.productId));
   const totalAmount = checkoutItems.reduce((acc, item) => acc + item.salesPrice * item.qty, 0);
@@ -200,35 +238,70 @@ const CheckOut = () => {
                   />
                   {errors.addressLine1 && <p className="text-red-500 text-xs mt-1">{errors.addressLine1.message}</p>}
                 </div>
+                 {/* PIN and City */}
+                  <div className="col-span-2">
+                    <div className="w-full">
+                      <label className="block text-sm font-medium text-gray-700">PIN Code*</label>
+                      <input
+                        type="text"
+                        {...register("pinCode", {
+                          required: "PIN Code is required",
+                          pattern: {
+                            value: /^[0-9]{6}$/,
+                            message: "PIN must be 6 digits",
+                          },
+                        })}
+                        placeholder="PIN Code"
+                        className="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2"
+                      />
+                      {errors.pinCode && <p className="text-red-500 text-sm mt-1">{errors.pinCode.message}</p>}
+                      {pinError && <p className="text-red-500 text-sm">{pinError}</p>}
+                      {loadingLocation && <p className="text-blue-500 text-sm">Fetching location...</p>}
+                    </div>
+                    {/* <select
+                      {...register("city", { required: "City is required" })}
+                      className={`border rounded-lg p-3 ${errors.city ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-emerald-400`}
+                    >
+                      <option value="">Select a City</option>
+                      <option value="Chennai">Chennai</option>
+                      <option value="Bangalore">Bangalore</option>
+                    </select> */}
+               </div>
 
-                <input
-                  {...register("pincode", {
-                    required: "PIN Code is required",
-                    pattern: { value: /^\d{6}$/, message: "Invalid PIN Code" },
-                  })}
-                  placeholder="PIN Code"
-                  className={`border rounded-lg p-3 ${errors.pincode ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-emerald-400`}
-                />
+                {/* District and State */}
+                <div className="col-span-2">
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-700">City Name*</label>
+                    <input
+                      type="text"
+                      {...register("city", { required: "City name is required" })}
+                      readOnly
+                      className="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100"
+                    />
+                    {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city.message}</p>}
+                  </div>
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-700">District Name*</label>
+                    <input
+                      type="text"
+                      {...register("district", { required: "District name is required" })}
+                      readOnly
+                      className="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100"
+                    />
+                    {errors.district && <p className="text-red-500 text-sm mt-1">{errors.district.message}</p>}
+                  </div>
 
-                <select
-                  {...register("city", { required: "City is required" })}
-                  className={`border rounded-lg p-3 ${errors.city ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-emerald-400`}
-                >
-                  <option value="">Select a City</option>
-                  <option value="Chennai">Chennai</option>
-                  <option value="Bangalore">Bangalore</option>
-                </select>
-
-                <input
-                  {...register("district", { required: "District is required" })}
-                  placeholder="District"
-                  className={`border rounded-lg p-3 ${errors.district ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-emerald-400`}
-                />
-                <input
-                  {...register("state", { required: "State is required" })}
-                  placeholder="State"
-                  className={`border rounded-lg p-3 ${errors.state ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-emerald-400`}
-                />
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-700">State Name*</label>
+                    <input
+                      type="text"
+                      {...register("state", { required: "State name is required" })}
+                      readOnly
+                      className="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100"
+                    />
+                    {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state.message}</p>}
+                  </div>
+                </div>
               </form>
             ) : (
               dbUser && (

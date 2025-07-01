@@ -4,6 +4,7 @@ import { CiTrash } from 'react-icons/ci';
 import { FiShoppingCart } from 'react-icons/fi';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
+import toast from "react-hot-toast";
 
 const Cart = () => {
   const { cartItems, updateCartQty } = useFirebase();
@@ -14,6 +15,34 @@ const Cart = () => {
   );
   const navigate = useNavigate();
   
+  const {setting}=useFirebase();
+  if(!setting){
+    return;
+  }
+
+  const minimumOrderValue = setting[0]?.MinOrderValue ?? 0;
+
+  const isMinimumOrderValid = (
+    cartTotal: number,
+    onFail?: () => void
+  ): boolean => {
+    if (cartTotal < minimumOrderValue) {
+      if (onFail) {
+        onFail();
+      } else {
+        toast.error(`Minimum order value is ₹${minimumOrderValue}. Please add more items.`);
+        // alert(`Minimum order value is ₹${minimumOrderValue}. Please add more items to your cart.`);
+      }
+      return false;
+    }
+    return true;
+  };
+
+  const handleCheckout = () => {
+    if (!isMinimumOrderValid(totalAmount)) return;
+
+    navigate('/checkout');
+  };
 
   return (
     <>
@@ -24,10 +53,9 @@ const Cart = () => {
             <p className="text-gray-800 font-semibold text-lg">
               Total: ₹{totalAmount.toFixed(2)}
             </p>
-            <button
-              className="mt-3 bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-4 py-2 rounded w-full"
-              onClick={() => navigate('/checkout')}
-            >
+            <button className="mt-3 bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-4 py-2 rounded w-full"
+               onClick={handleCheckout}
+              >
               Checkout
             </button>
           </div>
@@ -115,7 +143,7 @@ const Cart = () => {
               </div>
               <button
                 className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-4 py-2 rounded"
-                onClick={() => navigate('/checkout')}
+                onClick={handleCheckout}
               >
                 Checkout
               </button>
@@ -135,7 +163,7 @@ const Cart = () => {
                 </p>
                 <button
                   className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-2 rounded"
-                  onClick={() => navigate('/checkout')}
+                  onClick={handleCheckout}
                 >
                   Checkout
                 </button>

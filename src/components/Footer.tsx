@@ -51,11 +51,12 @@ export default function Footer() {
         <div className="sm:text-left text-center">
           <h3 className="text-lg font-semibold mb-4">Company</h3>
           <ul className="space-y-2 text-sm">
-            <li><a href="#" className="hover:underline">Shop Now</a></li>
-            <li><a href="#" className="hover:underline">About Us</a></li>
-            <li><a href="#" className="hover:underline">Delivery Information</a></li>
+            <li><a href="/shop" className="hover:underline">Shop Now</a></li>
+            <li><a href="/wishlist" className="hover:underline">Wish List</a></li>
+            <li><a href="/track-order" className="hover:underline">Track Order</a></li>
+            <li><a href="/aboutus" className="hover:underline">About Us</a></li>
+            <li><a href="contactus" className="hover:underline">Contact Us</a></li>
             <li><a href="#" className="hover:underline">Terms & Conditions</a></li>
-            <li><a href="#" className="hover:underline">Contact Us</a></li>
           </ul>
         </div>
 

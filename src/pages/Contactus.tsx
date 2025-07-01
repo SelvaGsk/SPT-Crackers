@@ -11,7 +11,9 @@ import emailjs from "@emailjs/browser";
 const Contactus = () => {
 
   const {setting}=useFirebase();
-  
+  if(!setting){
+    return;
+  }
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",

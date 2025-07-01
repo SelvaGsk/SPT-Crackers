@@ -111,42 +111,42 @@ export default AdminProduct;
 export const AddProductToShop = () => {
   const [formData, setFormData] = useState({
     CategoryName: "",
-    FlavourCode: '',
+    FlavourCode: 0,
     PriceListID: "",
     PriceListName: "",
-    SubCategoryCode: '',
+    SubCategoryCode: 0,
     active: true,
-    beforeDiscPrice: "",
-    cessPerc: "",
-    cgstperc: "",
+    beforeDiscPrice: 0,
+    cessPerc: 0,
+    cgstperc: 0,
     companyID: "",
     contains: "",
-    discAmt: "",
-    discPerc: "",
-    free: "",
-    gst: '',
+    discAmt: 0,
+    discPerc: 0,
+    free: 0,
+    gst: 0,
     hsnCode: "",
     id: "",
-    importStatus: '',
-    isMarginBased: "",
-    margin: '',
-    per: '',
-    productCode: "",
-    productGroupCode: "",
+    importStatus: false,
+    isMarginBased: false,
+    margin: 0,
+    per: 1,
+    productCode: 0,
+    productGroupCode: 0,
     productGroupId: "",
     productId: "",
     productImageURL: "",
     productImageURL2: "",
     productName: "",
-    qty: '',
-    rate: '',
-    retailproduct: '',
-    salesPrice: '',
-    sgstperc: '',
-    sortingorder: '',
-    stock: '',
-    stockValue: '',
-    uom: '',
+    qty: 0,
+    rate: 0,
+    retailproduct: true,
+    salesPrice: 0,
+    sgstperc: 0,
+    sortingorder: 1,
+    stock: 0,
+    stockValue: 0,
+    uom: 0,
     uomid: "",
     youtubeURL: ""
   });
@@ -167,23 +167,39 @@ export const AddProductToShop = () => {
   },[])
 
   const handleChange = (field: string, value: string | number | boolean) => {
+
+    const numberFields = [
+      'discPerc', 'discAmt', 'salesPrice', 'rate',
+      'qty', 'free', 'margin', 'per', 'beforeDiscPrice',
+      'stock', 'stockValue', 'cgstperc', 'sgstperc', 'cessPerc', 'gst',
+      'productCode', 'productGroupCode', 'uom'
+    ];
+    const booleanFields = ['active', 'importStatus', 'isMarginBased'];
+
+    let parsedValue: string | number | boolean = value;
+
+    if (numberFields.includes(field)) {
+      parsedValue = Number(value);
+    } else if (booleanFields.includes(field)) {
+      parsedValue = value === 'true' || value === true;
+    }
+
     setFormData((prev) => {
       const updated = {
         ...prev,
-        [field]: value,
+        [field]: parsedValue,
       };
 
       // Auto-calculate Discount Amount and Sales Price
-      const beforeDisc = parseFloat(updated.beforeDiscPrice as string);
-      const discPerc = parseFloat(updated.discPerc as string);
+      const beforeDisc = Number(updated.beforeDiscPrice);
+      const discPerc = Number(updated.discPerc);
 
       if (!isNaN(beforeDisc) && !isNaN(discPerc)) {
         const discAmt = (beforeDisc * discPerc) / 100;
         const salesPrice = beforeDisc - discAmt;
-        updated.discAmt = discAmt;
-        updated.salesPrice = salesPrice;
+        updated.discAmt = parseFloat(discAmt.toFixed(2)); // optional rounding
+        updated.salesPrice = parseFloat(salesPrice.toFixed(2));
       }
-
       return updated;
     });
   };
@@ -215,42 +231,42 @@ export const AddProductToShop = () => {
       // Reset
       setFormData({
         CategoryName: "",
-        FlavourCode: "",
+        FlavourCode: 0,
         PriceListID: "",
         PriceListName: "",
-        SubCategoryCode: "",
-        active: "",
-        beforeDiscPrice: "",
-        cessPerc: "",
-        cgstperc: "",
+        SubCategoryCode: 0,
+        active: true,
+        beforeDiscPrice: 0,
+        cessPerc: 0,
+        cgstperc: 0,
         companyID: "",
         contains: "",
-        discAmt: "",
-        discPerc: "",
-        free: "",
-        gst: "",
+        discAmt: 0,
+        discPerc: 0,
+        free: 0,
+        gst: 0,
         hsnCode: "",
         id: "",
-        importStatus: "",
-        isMarginBased: "",
-        margin: "",
-        per: "",
-        productCode: "",
-        productGroupCode: "",
+        importStatus: false,
+        isMarginBased: false,
+        margin: 0,
+        per: 1,
+        productCode: 0,
+        productGroupCode: 0,
         productGroupId: "",
         productId: "",
         productImageURL: "",
         productImageURL2: "",
         productName: "",
-        qty: "",
-        rate: "",
-        retailproduct: "",
-        salesPrice: "",
-        sgstperc: "",
-        sortingorder: "",
-        stock: "",
-        stockValue: "",
-        uom: "",
+        qty: 0,
+        rate: 0,
+        retailproduct: true,
+        salesPrice: 0,
+        sgstperc: 0,
+        sortingorder: 1,
+        stock: 0,
+        stockValue: 0,
+        uom: 0,
         uomid: "",
         youtubeURL: ""
       });
@@ -457,7 +473,7 @@ export const AddProductToShop = () => {
           </div>
 
           <div>
-            <label>Sales Rate</label>
+            <label>Purchase Rate</label>
             <Input
               type="number"
               placeholder="Rate"
@@ -598,21 +614,38 @@ export const EditProduct=()=>{
 const [imageFile, setImageFile] = useState(null);
 
    const handleChange = (field: string, value: string | number | boolean) => {
+
+    const numberFields = [
+      'discPerc', 'discAmt', 'salesPrice', 'rate',
+      'qty', 'free', 'margin', 'per', 'beforeDiscPrice',
+      'stock', 'stockValue', 'cgstperc', 'sgstperc', 'cessPerc', 'gst',
+      'productCode', 'productGroupCode', 'uom'
+    ];
+    const booleanFields = ['active', 'importStatus', 'isMarginBased'];
+
+    let parsedValue: string | number | boolean = value;
+
+    if (numberFields.includes(field)) {
+      parsedValue = Number(value);
+    } else if (booleanFields.includes(field)) {
+      parsedValue = value === 'true' || value === true;
+    }
+
     setselectedProduct((prev) => {
       const updated = {
         ...selectedProduct,
-        [field]: value,
+        [field]: parsedValue,
       };
 
       // Auto-calculate Discount Amount and Sales Price
-      const beforeDisc = parseFloat(updated.beforeDiscPrice as string);
-      const discPerc = parseFloat(updated.discPerc as string);
-
+      const beforeDisc = Number(updated.beforeDiscPrice);
+      const discPerc = Number(updated.discPerc);
+      
       if (!isNaN(beforeDisc) && !isNaN(discPerc)) {
         const discAmt = (beforeDisc * discPerc) / 100;
         const salesPrice = beforeDisc - discAmt;
-        updated.discAmt = discAmt;
-        updated.salesPrice = salesPrice;
+        updated.discAmt = parseFloat(discAmt.toFixed(2)); // optional rounding
+        updated.salesPrice = parseFloat(salesPrice.toFixed(2));
       }
 
       return updated;
@@ -638,7 +671,7 @@ const [imageFile, setImageFile] = useState(null);
      const productRef = dbRef(database, `SPT/Products/${selectedProduct.id}`);
      await set(productRef, finalData);
 
-      toast.success("Product added successfully!");
+      toast.success("Product updated successfully!");
 
     
       setImageFile(null);
@@ -847,7 +880,7 @@ const [imageFile, setImageFile] = useState(null);
   <label>Unit</label>
 <select
   className="w-full border px-2 py-1 rounded"
-  value={formData.uom}
+  value={selectedProduct.uom}
   onChange={(e) => {
     const selectedId = e.target.value;
     const selectedGroup = generalMaster?.["UOM"]?.[selectedId];
@@ -877,7 +910,7 @@ const [imageFile, setImageFile] = useState(null);
           </div>
 
           <div>
-            <label>Sales Rate</label>
+            <label>Purchase Rate</label>
             <Input
               type="number"
               placeholder="Rate"
@@ -939,7 +972,7 @@ const [imageFile, setImageFile] = useState(null);
             )}
             <div className="flex justify-center mt-4 ">
           <Button onClick={handleSubmit} disabled={loading}>
-            {loading ? "Uploading..." : "Add Product"}
+            {loading ? "Uploading..." : "Update Product"}
           </Button>
         </div>
             

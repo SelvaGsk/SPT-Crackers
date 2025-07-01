@@ -104,7 +104,7 @@ const OrderTrack = () => {
                       Placed: {order.date}
                     </p>
                     <p className="text-sm font-semibold text-green-700">
-                      ₹{(order.totalAmount + order.packingCharge)?.toFixed(2)}
+                      ₹{(order.totalAmount + (order.packingCharge ?? 0)).toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -236,10 +236,10 @@ const OrderTrack = () => {
                   </table>
                 </div>
                 <div className="text-right text-xl font-bold text-gray-800 mt-4">
-                  PackingCharge: ₹{(selectedOrder.packingCharge)?.toFixed(2)}
+                  PackingCharge: ₹{(selectedOrder.packingCharge ?? 0)?.toFixed(2)}
                 </div>
                 <div className="text-right text-xl font-bold text-gray-800 mt-4">
-                  Total: ₹{(selectedOrder.totalAmount + selectedOrder.packingCharge)?.toFixed(2)}
+                Total: ₹{(selectedOrder.totalAmount + (selectedOrder.packingCharge ?? 0)).toFixed(2)}
                 </div>
               </div>
             </div>

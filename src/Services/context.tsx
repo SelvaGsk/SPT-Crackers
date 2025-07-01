@@ -349,15 +349,12 @@ const updateCartQty = async (
     totalAmount: number
   ) => {
     const now = new Date();
-    const formattedDate = now.toLocaleString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    });
+    const formattedDate = `${String(now.getDate()).padStart(2, '0')}/` +
+                      `${String(now.getMonth() + 1).padStart(2, '0')}/` +
+                      `${now.getFullYear()} ` +
+                      `${String(now.getHours()).padStart(2, '0')}:` +
+                      `${String(now.getMinutes()).padStart(2, '0')}:` +
+                      `${String(now.getSeconds()).padStart(2, '0')}`;
   
     try {
       if (!user || !user.uid) return;

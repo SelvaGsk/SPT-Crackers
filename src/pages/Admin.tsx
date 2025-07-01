@@ -11,6 +11,9 @@ import {
   FaHourglassHalf,
 } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
 const Admin = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -79,6 +82,25 @@ const [localSetting, setLocalSetting] = useState(null);
           (shipped && s.shipped === "true") ||
           (delivered && s.delivered === "true")
         );
+      })
+      .sort((a, b) => {
+        const format = "DD/MM/YYYY HH:mm:ss";
+      
+        const dateA = dayjs(a.date, format, true); // true = strict parsing
+        const dateB = dayjs(b.date, format, true);
+      
+        if (!dateA.isValid() && !dateB.isValid()) return 0;
+        if (!dateA.isValid()) return 1;
+        if (!dateB.isValid()) return -1;
+      
+        // Sort by date DESC
+        if (dateA.isAfter(dateB)) return -1;
+        if (dateA.isBefore(dateB)) return 1;
+      
+        // Fallback to name ASC
+        const nameA = a.custName?.toLowerCase() || "";
+        const nameB = b.custName?.toLowerCase() || "";
+        return nameA.localeCompare(nameB);
       });
 
     setFilteredOrders(filtered);

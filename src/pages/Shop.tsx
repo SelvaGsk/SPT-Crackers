@@ -34,6 +34,10 @@ export const ProductCard = React.memo(({ product }) => {
   const currentProduct = cartItems?.[product.productId];
   const qty = currentProduct?.qty || 0;
 
+  const [showZoom, setShowZoom] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
+  const productImages = [product.productImageURL, product.productImageURL2].filter(Boolean);
+
   return (
     <>
     <Helmet>
@@ -46,47 +50,116 @@ export const ProductCard = React.memo(({ product }) => {
       <meta property="og:image" content="/meta/shop-banner.jpg" />
       <meta property="og:url" content="https://sptcrackers.com/shop" />
     </Helmet>
+     
     <div className="bg-white rounded-xl shadow hover:shadow-md transition p-4 flex flex-col">
-      <img src={product?.productImageURL} alt={product.productName} className="rounded-md h-[250px] w-full object-cover mb-3" />
-      <div className="text-center mb-2">
-        <p className="text-sm text-gray-500">{product.productName}</p>
+        <img
+          src={productImages[0]}
+          alt={product.productName}
+          className="rounded-md h-[250px] w-full object-cover mb-3 cursor-pointer"
+          onClick={() => setShowZoom(true)}
+        />
+
+        <div className="text-center mb-2">
+          <p className="text-sm text-gray-500">{product.productName}</p>
+        </div>
+        <div className="text-center mb-2">
+          <span className="text-red-500 line-through">₹{product.beforeDiscPrice?.toFixed(2)} </span>
+          <span className="text-emerald-600 font-bold mr-2">₹{product.salesPrice?.toFixed(2)} </span>
+        </div>
+        <div className="mt-auto flex justify-between items-center">
+          {product.youtubeURL && (
+            <button>
+              <FaYoutube className="text-red-500 text-3xl cursor-pointer" />
+            </button>
+          )}
+
+          {qty > 0 ? (
+            <div className="flex items-center mx-auto gap-2">
+              <button
+                onClick={() => updateCartQty(product.productId, "dec")}
+                className="px-2 py-1 bg-red-500 text-white rounded"
+              >
+                −
+              </button>
+              <input
+                type="number"
+                min={1}
+                value={qty}
+                onChange={(e) => updateCartQty(product.productId, parseInt(e.target.value))}
+                className="w-16 text-center border rounded px-2 py-1"
+              />
+              <button
+                onClick={() => updateCartQty(product.productId, "inc")}
+                className="px-2 py-1 bg-green-500 text-white rounded"
+              >
+                +
+              </button>
+            </div>
+          ) : (
+            <Button
+              className="bg-green-500 text-white px-6 py-2 rounded-full mx-auto"
+              onClick={() => toggleCart(product)}
+            >
+              Add To Cart
+            </Button>
+          )}
+
+          <button
+            onClick={() => {
+              toggleWishList(product.id);
+              toast.success(isInWishlist ? 'Product is removed from wishlist' : 'Product is added to wishlist');
+            }}
+          >
+            {isInWishlist ? <FaHeart className="text-2xl text-red-500" /> : <CiHeart className="text-3xl" />}
+          </button>
+        </div>
       </div>
-      <div className="text-center mb-2">
-        <span className="text-red-500 line-through">₹{product.beforeDiscPrice?.toFixed(2)} </span>
-        <span className="text-emerald-600 font-bold mr-2">₹{product.salesPrice?.toFixed(2)} </span>
-      </div>
-      <div className="mt-auto flex justify-between items-center">
-        {product.youtubeURL && <button><FaYoutube className="text-red-500 text-3xl cursor-pointer" /></button>}
-        {qty > 0 ? (
-          <div className="flex items-center mx-auto gap-2">
-            <button onClick={() => updateCartQty(product.productId, "dec")} className="px-2 py-1 bg-red-500 text-white rounded">−</button>
-            <input
-              type="number"
-              min={1}
-              value={qty}
-              onChange={(e) => updateCartQty(product.productId, parseInt(e.target.value))}
-              className="w-16 text-center border rounded px-2 py-1"
+
+      {/* ✅ Zoom Dialog with Slider */}
+      {showZoom && (
+        <div
+          className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center"
+          onClick={() => setShowZoom(false)}
+        >
+          <div
+            className="relative bg-white p-2 rounded-md max-w-[90%] max-h-[90%] flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Image Slider */}
+            <img
+              src={productImages[activeImage]}
+              alt={`Zoom ${product.productName}`}
+              className="max-h-[80vh] object-contain rounded mb-2"
             />
-            <button onClick={() => updateCartQty(product.productId, "inc")} className="px-2 py-1 bg-green-500 text-white rounded">+</button>
+            {productImages.length > 1 && (
+              <div className="flex gap-2 mt-1">
+                {productImages.map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={img}
+                    alt={`Thumb ${idx}`}
+                    onClick={() => setActiveImage(idx)}
+                    className={`w-14 h-14 object-cover rounded border cursor-pointer ${activeImage === idx ? 'border-green-500' : 'border-gray-300'}`}
+                  />
+                ))}
+              </div>
+            )}
+
+            <button
+              onClick={() => setShowZoom(false)}
+              className="absolute top-2 right-2 bg-black text-white px-2 py-1 text-sm rounded-full"
+            >
+              ✕
+            </button>
           </div>
-        ) : (
-          <Button className="bg-green-500 text-white px-6 py-2 rounded-full mx-auto" onClick={() => toggleCart(product)}>
-            Add To Cart
-          </Button>
-        )}
-        <button onClick={() => {
-          toggleWishList(product.id);
-          toast.success(isInWishlist ? 'Product is removed from wishlist' : 'Product is added to wishlist')
-        }}>
-          {isInWishlist ? <FaHeart className="text-2xl text-red-500" /> : <CiHeart className="text-3xl" />}
-        </button>
-      </div>
-    </div>
+        </div>
+      )}
     </>
   );
 
   <Footer/>
 });
+
 
 export const ProductTableRow = React.memo(({ product }) => {
   const { toggleWishList, wishlistIds, toggleCart, cartItems, updateCartQty } = useFirebase();
@@ -94,42 +167,143 @@ export const ProductTableRow = React.memo(({ product }) => {
   const currentProduct = cartItems?.[product.productId];
   const qty = currentProduct?.qty || 0;
 
-  return (
-    <tr className="border-b">  
-      <td className="p-2 w-[15px] lg:w-[90px]"><img src={product.productImageURL} alt="" className="w-15 h-15 object-cover rounded-md" /></td>
-      <td className="p-2 w-[60px] lg:w-[120px]">{product.productName}</td>
-      <td className="p-2 w-[30px] lg:w-[90px] text-red-500 line-through">₹{product.beforeDiscPrice?.toFixed(2)}</td>
-      <td className="p-2 w-[30px] lg:w-[90px]">₹{product.salesPrice?.toFixed(2)}</td>
-      <td className="p-2 w-[30px] lg:w-[90px]">
-        {qty > 0 ? (
-          <div className="flex items-center gap-2">
-            <button onClick={() => updateCartQty(product.productId, "dec")} className="px-2 py-1 bg-red-500 text-white rounded">−</button>
-            <input
-              type="number"
-              min={1}
-              value={qty}
-              onChange={(e) => updateCartQty(product.productId, parseInt(e.target.value))}
-              className="w-16 text-center border rounded px-2 py-1"
-            />
-            <button onClick={() => updateCartQty(product.productId, "inc")} className="px-2 py-1 bg-green-500 text-white rounded">+</button>
-          </div>
-        ) : (
-          <Button className="bg-green-500 text-white text-sm" onClick={() => toggleCart(product)}>Add</Button>
-        )}
-      </td>
-      {/* <td className="p-2 text-center">
-        <button onClick={() => {
-          toggleWishList(product.id);
-          toast.success(isInWishlist ? 'Product is removed from wishlist' : 'Product is added to wishlist')
-        }}>
-          {isInWishlist ? <FaHeart className="text-xl text-red-500" /> : <CiHeart className="text-2xl" />}
-        </button>
-      </td> */}
-    </tr>
-  );
-  <Footer/>
+  const [zoomImage, setZoomImage] = useState(false);
 
+  return (
+    <>
+      {/* ✅ Mobile View */}
+      <tr className="block sm:hidden border-b p-2">
+        <td className="block w-full">
+          <div className="flex items-center justify-between gap-2 w-full overflow-hidden">
+
+            {/* 🔍 Clickable Image for Zoom */}
+            <img
+              src={product.productImageURL}
+              alt={product.productName}
+              onClick={() => setZoomImage(true)}
+              className="w-14 h-14 object-cover rounded-md flex-shrink-0 cursor-pointer"
+            />
+
+            {/* Name + Price in one line with wrapping only product name */}
+            <div className="flex flex-col justify-center max-w-[140px] text-xs">
+              <p className="font-semibold leading-tight truncate">{product.productName}</p>
+              <div className="flex gap-1 text-[11px] whitespace-nowrap">
+                <span className="text-red-500 line-through">₹{product.beforeDiscPrice?.toFixed(2)}</span>
+                <span className="text-green-600 font-bold">₹{product.salesPrice?.toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* Add / Qty Button */}
+            <div className="flex-shrink-0">
+              {qty > 0 ? (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => updateCartQty(product.productId, "dec")}
+                    className="px-2 py-1 bg-red-500 text-white rounded text-xs"
+                  >−</button>
+                  <input
+                    type="number"
+                    min={1}
+                    value={qty}
+                    onChange={(e) => updateCartQty(product.productId, parseInt(e.target.value))}
+                    className="w-10 text-center border rounded text-xs"
+                  />
+                  <button
+                    onClick={() => updateCartQty(product.productId, "inc")}
+                    className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+                  >+</button>
+                </div>
+              ) : (
+                <Button
+                  className="bg-green-500 text-white text-xs px-3 py-1"
+                  onClick={() => toggleCart(product)}
+                >
+                  Add
+                </Button>
+              )}
+            </div>
+          </div>
+        </td>
+      </tr>
+
+      {/* ✅ Desktop View */}
+      <tr className="hidden sm:table-row border-b">
+        <td className="p-2 w-[60px] lg:w-[90px]">
+          <img
+            src={product.productImageURL}
+            alt={product.productName}
+            className="w-20 h-20 object-cover rounded-md"
+          />
+        </td>
+        <td className="p-2 w-[120px]">{product.productName}</td>
+        <td className="p-2 w-[90px] text-red-500 line-through">
+          ₹{product.beforeDiscPrice?.toFixed(2)}
+        </td>
+        <td className="p-2 w-[90px] text-emerald-600">
+          ₹{product.salesPrice?.toFixed(2)}
+        </td>
+        <td className="p-2 w-[140px]">
+          {qty > 0 ? (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => updateCartQty(product.productId, "dec")}
+                className="px-2 py-1 bg-red-500 text-white rounded"
+              >
+                −
+              </button>
+              <input
+                type="number"
+                min={1}
+                value={qty}
+                onChange={(e) => updateCartQty(product.productId, parseInt(e.target.value))}
+                className="w-16 text-center border rounded px-2 py-1"
+              />
+              <button
+                onClick={() => updateCartQty(product.productId, "inc")}
+                className="px-2 py-1 bg-green-500 text-white rounded"
+              >
+                +
+              </button>
+            </div>
+          ) : (
+            <Button
+              className="bg-green-500 text-white text-sm"
+              onClick={() => toggleCart(product)}
+            >
+              Add
+            </Button>
+          )}
+        </td>
+      </tr>
+
+      {/* ✅ Modal for zoomed image */}
+      {zoomImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+          onClick={() => setZoomImage(false)}
+        >
+          <div
+            className="relative bg-white rounded-md p-2 max-w-[90%] max-h-[90%]"
+            onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+          >
+            <img
+              src={product.productImageURL}
+              alt={product.productName}
+              className="max-h-[80vh] object-contain rounded"
+            />
+            <button
+              onClick={() => setZoomImage(false)}
+              className="absolute top-2 right-2 bg-black text-white px-2 py-1 text-sm rounded-full"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
 });
+
 
 const Shop = () => {
   const { searchTerm, products,TAGS } = useFirebase();
@@ -322,27 +496,30 @@ const Shop = () => {
           ))}
         </div>
       ) : (
-       <div className="w-full overflow-x-auto">
-        <div className="min-w-full inline-block align-middle bg-white rounded shadow">
-          <table className="min-w-[700px] table-auto w-full text-left text-sm">
-            <thead className="bg-gray-100 uppercase text-xs">
-              <tr>
-                <th className="p-2 w-[30px] lg:w-[120px]">Image</th>
-                <th className="p-2 w-[60px] lg:w-[120px]">Name</th>
-                <th className="p-2 w-[30px] lg:w-[100px]">MRP</th>
-                <th className="p-2 w-[30px] lg:w-[100px]">Offer Rate</th>
-                <th className="p-2 w-[30px] lg:w-[100px]">Cart</th>
-                {/* <th className="p-2 text-center whitespace-nowrap">Wishlist</th> */}
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedProducts.map((product, i) => (
-                <ProductTableRow key={i} product={product} />
-              ))}
-            </tbody>
-          </table>
+          <div className="w-full">
+          <div className="inline-block min-w-full align-middle bg-white rounded shadow">
+            <table className="w-full table-fixed sm:table-auto text-left text-sm">
+              
+              {/* ✅ Hide header on mobile */}
+              <thead className="hidden sm:table-header-group bg-gray-100 uppercase text-xs">
+                <tr>
+                  <th className="p-2 w-[30px] lg:w-[120px]">Image</th>
+                  <th className="p-2 w-[60px] lg:w-[120px]">Name</th>
+                  <th className="p-2 w-[30px] lg:w-[100px]">MRP</th>
+                  <th className="p-2 w-[30px] lg:w-[100px]">Offer Rate</th>
+                  <th className="p-2 w-[30px] lg:w-[100px]">Cart</th>
+                </tr>
+              </thead>
+        
+              <tbody>
+                {paginatedProducts.map((product, i) => (
+                  <ProductTableRow key={i} product={product} />
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      
       )}
 
       {totalPages > 1 && (

@@ -23,8 +23,11 @@ import {
   ref,
   remove,
   set,
+  push 
 } from "firebase/database";
 import { useNavigate } from "react-router-dom";
+// import { getFunctions, httpsCallable } from "firebase/functions";
+import { app } from "./firebase.config.js";
 
 // ---- Interface ----
 interface FirebaseContextType {
@@ -61,6 +64,7 @@ interface FirebaseContextType {
   setdbUser: React.Dispatch<React.SetStateAction<any>>;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
 }
+
 
 // ---- Create Context ----
 const FirebaseContext = createContext<FirebaseContextType | undefined>(
@@ -361,11 +365,11 @@ const updateCartQty = async (
       const dbUser = await getUser();
       const orderId = Date.now().toString();
       const orderRef = ref(database, `SPT/CustomerOrder/${user.uid}/${orderId}`);
-if(useExistingAddress&&!dbUser?.accounterName)
-  {
-    toast.error('Please update address on profile');
-    return;
-  }
+      if(useExistingAddress&&!dbUser?.accounterName)
+      {
+        toast.error('Please update address on profile');
+        return;
+      }
       const orderData = {
         billNo: orderId,
         billProductList: billProductList || [],
@@ -398,9 +402,29 @@ if(useExistingAddress&&!dbUser?.accounterName)
         totalAmount: totalAmount,
         transportName: "",
       };
-
+ 
       await set(orderRef, orderData);
-      toast.success("✅ Order placed successfully");
+      
+      // console.log("Before Await");
+      // await set(orderRef, orderData);
+      // console.log("After Await");
+      
+      // // ✅ Send WhatsApp Message
+      // const functions = getFunctions(app);
+      // console.log("Before http Call");
+      // const sendWhatsAppMessage = httpsCallable(functions, "sendWhatsAppMessage");
+
+      // console.log("Before Send msg");
+
+      // await sendWhatsAppMessage({
+      //   customerNumber: "91xxxxxxxxxx",
+      //   message: "Your order was placed successfully!",
+      // });
+
+      // console.log("After Send Msg");
+
+    // toast.success("✅ Order placed and WhatsApp message sent!");
+    toast.success("✅ Order placed successfully!");
 
       for (const item of billProductList) {
         const productRef = ref(

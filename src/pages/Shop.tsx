@@ -96,7 +96,6 @@ export const ProductTableRow = React.memo(({ product }) => {
 
   return (
     <tr className="border-b">  
-    {/* className="border-b"> */}
       <td className="p-2 w-[15px] lg:w-[90px]"><img src={product.productImageURL} alt="" className="w-15 h-15 object-cover rounded-md" /></td>
       <td className="p-2 w-[60px] lg:w-[120px]">{product.productName}</td>
       <td className="p-2 w-[30px] lg:w-[90px] text-red-500 line-through">₹{product.beforeDiscPrice?.toFixed(2)}</td>
@@ -168,7 +167,7 @@ const Shop = () => {
 
     if (selectedTags.length > 0) {
       filtered = filtered.filter(p =>
-        selectedTags.some(tag => p.tags?.toLowerCase().includes(tag.toLowerCase()))
+        selectedTags.some(tag => p.tag?.toLowerCase().includes(tag.toLowerCase()))
       );
     }
 
@@ -190,7 +189,6 @@ const Shop = () => {
     // Default sorting by `sortingorder`
     filtered.sort((a, b) => (a.sortingorder ?? 0) - (b.sortingorder ?? 0));
 }
-
 
     setFilteredproducts(filtered);
     setCurrentPage(1);

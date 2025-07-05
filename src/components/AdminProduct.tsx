@@ -148,7 +148,8 @@ export const AddProductToShop = () => {
     stockValue: 0,
     uom: 0,
     uomid: "",
-    youtubeURL: ""
+    youtubeURL: "",
+    tag:""
   });
 
   const [imageFile, setImageFile] = useState(null);
@@ -268,7 +269,8 @@ export const AddProductToShop = () => {
         stockValue: 0,
         uom: 0,
         uomid: "",
-        youtubeURL: ""
+        youtubeURL: "",
+        tag:""
       });
 
       setImageFile(null);
@@ -514,6 +516,25 @@ export const AddProductToShop = () => {
               value={formData.youtubeURL}
               onChange={(e) => handleChange("youtubeURL", e.target.value)}
             />
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">Tag Name</label>
+            <select
+              className="w-full border px-2 py-1 rounded"
+              value={formData.tag || ""}
+              onChange={(e) => {
+                const selectedTag = e.target.value;
+                handleChange("tag", selectedTag); // Just saving tagName as string
+              }}
+            >
+              <option value="">Select Tag</option>
+              {Array.isArray(generalMaster?.Tags) &&
+                generalMaster.Tags.map((tag, index) => (
+                  <option key={index} value={tag}>
+                    {tag}
+                  </option>
+                ))}
+            </select>
           </div>
 
           <div className="sm:col-span-2">
@@ -951,6 +972,25 @@ const [imageFile, setImageFile] = useState(null);
               value={selectedProduct.youtubeURL}
               onChange={(e) => handleChange("youtubeURL", e.target.value)}
             />
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">Tag Name</label>
+            <select
+              className="w-full border px-2 py-1 rounded"
+              value={selectedProduct.tag || ""}
+              onChange={(e) => {
+                const selectedTag = e.target.value;
+                handleChange("tag", selectedTag); // Just saving tagName as string
+              }}
+            >
+              <option value="">Select Tag</option>
+              {Array.isArray(generalMaster?.Tags) &&
+                generalMaster.Tags.map((tag, index) => (
+                  <option key={index} value={tag}>
+                    {tag}
+                  </option>
+                ))}
+            </select>
           </div>
 
           <div className="sm:col-span-2">

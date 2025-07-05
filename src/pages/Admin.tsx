@@ -13,6 +13,8 @@ import {
 import { MdDeleteForever } from "react-icons/md";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const Admin = () => {
   const [orders, setOrders] = useState([]);
@@ -180,6 +182,7 @@ const [localSetting, setLocalSetting] = useState(null);
       
     }));
   };
+
 
   const handlePrint = () => {
     const printContent = document.getElementById('print-section');

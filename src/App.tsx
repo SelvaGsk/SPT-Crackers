@@ -19,6 +19,12 @@ import RegisterDialog from "./components/RegisterDialog"
 import { FaWhatsapp } from "react-icons/fa6"
 import Admin from "./pages/Admin"
 import ProductAdministration from "./pages/ProductAdministration"
+import { useNavigate } from "react-router-dom";
+import { FaShoppingBag, FaShoppingCart } from 'react-icons/fa';
+import { ShoppingBag, ShoppingBasket, ShoppingBasketIcon, ShoppingCart } from "lucide-react"
+import { CiShoppingCart } from "react-icons/ci"
+import { FiShoppingCart } from "react-icons/fi"
+import { useLocation } from "react-router-dom";
 
 const App = () => {
   const { setting, products, cartItems, TAGS, user, getUser, setdbUser, userloading } = useFirebase();
@@ -30,7 +36,12 @@ const App = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const navigate = useNavigate(); // for redirection
 
+  // In your layout or App.tsx where floating icons are rendered
+  const location = useLocation();
+  const hideFloatingButtons = location.pathname === "/shop" || location.pathname === "/cart";
+  
   // 👇 Set initial position to bottom-right
   useEffect(() => {
     setPosition({
@@ -97,6 +108,10 @@ const App = () => {
     setDragging(true);
   };
 
+  const openShopListView = () => {
+    navigate("/shop?view=list");
+  };
+
   const openWhatsApp = () => {
     const phoneRaw = setting[0]?.CellNO || '';
     const phone = phoneRaw.replace(/\s+/g, ''); // Removes all spaces
@@ -104,6 +119,8 @@ const App = () => {
     // console.log( `https://wa.me/${phone}?text=${message}`);
     window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
   };
+
+  
 
   return (
     <>
@@ -132,20 +149,32 @@ const App = () => {
         </Dialog>
       )}
 
-      {/* 👇 WhatsApp Floating Button */}
-      <div
-        ref={whatsappRef}
-        onMouseDown={handleMouseDown}
-        onClick={openWhatsApp}
-        className="fixed z-50 cursor-move bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg"
-        style={{
-          left: position.x,
-          top: position.y,
-          transition: dragging ? "none" : "0.2s"
-        }}
-      >
-        <FaWhatsapp size={28} />
+    {!hideFloatingButtons && (
+      <div className="fixed z-50 bottom-6 right-6 flex flex-col items-center gap-4">
+        {/* 🔵 Quick Shop Button */}
+        <div
+          onClick={openShopListView}
+          className="flex flex-col items-center text-center cursor-pointer"
+        >
+          <div className="bg-white hover:bg-blue-100 border border-blue-500 shadow-lg p-3 rounded-full transition-colors duration-200">
+            <FiShoppingCart size={22} className="text-blue-600" />
+          </div>
+          <span className="text-sm text-blue-600 font-semibold mt-1">Quick Shop</span>
+        </div>
+
+        {/* 🟢 WhatsApp Floating Button */}
+        <div
+          ref={whatsappRef}
+          onMouseDown={handleMouseDown}
+          onClick={openWhatsApp}
+          className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg cursor-move"
+        >
+          <FaWhatsapp size={28} />
+        </div>
       </div>
+    )}
+    
+        
     </>
   );
 };

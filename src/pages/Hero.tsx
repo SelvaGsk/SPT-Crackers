@@ -5,6 +5,7 @@ import FeatureCards from "@/components/FeatureCards";
 import ProductCarousel from "@/components/ProducCarousel";
 import Footer from "@/components/Footer";
 import { Helmet } from 'react-helmet-async';
+import { TagProductSection } from "@/components/FeatureProducts";
 
 const Hero = () => {
   return (
@@ -24,6 +25,11 @@ const Hero = () => {
       </section>
       <section className="relative mt-12">
         <FeatureCards/>
+      </section>
+      <section className="px-2 sm:px-4 md:px-6 lg:px-10 space-y-8">
+        <TagProductSection tag="New Arrival" title="✨ New Arrivals" />
+        <TagProductSection tag="Childrens Items" title="🧒 Children’s Picks" />
+        <TagProductSection tag="Best Selling" title="🔥 Best Sellers" />
       </section>
       <section>
         <ProductCarousel/>

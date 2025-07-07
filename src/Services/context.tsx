@@ -40,7 +40,7 @@ interface FirebaseContextType {
   toggleWishList: (productId: string) => Promise<void>;
   toggleCart: (product: any) => Promise<void>;
   GsignUp:() => Promise<void>;
-  updateCartQty: (productId: string, type: "inc" | "dec") => Promise<void>;
+  updateCartQty: (productId: string, type: "inc" | "dec" | number) => Promise<void>;
   placeOrder: (
     billProductList: any[],
     packingChargeAmount: number,
@@ -319,12 +319,22 @@ const updateCartQty = async (
 
   const productRef = ref(database, `SPT/tempCart/${user.uid}/${productId}`);
   const snapshot = await get(productRef);
-  if (!snapshot.exists()) return;
+  // if (!snapshot.exists()) return;
+
+    // If product is not in cart, add it
+    if (!snapshot.exists()) {
+      const qty = typeof action === "number" ? action : 1;
+      if (qty > 0) {
+        await set(productRef, { productId, qty });
+      }
+      return;
+    }
 
   const item = snapshot.val();
   let newQty: number;
 
   if (typeof action === "number") {
+    if (isNaN(action)) return; // ⛔ Prevent setting NaN
     newQty = action;
   } else {
     newQty = action === "inc" ? item.qty + 1 : item.qty - 1;

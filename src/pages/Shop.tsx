@@ -18,6 +18,10 @@ import {
 } from "@/components/ui/pagination";
 import toast from "react-hot-toast";
 import { Helmet } from 'react-helmet-async';
+import { useSearchParams } from 'react-router-dom';
+import { ProductCardComponent } from "@/components/ProductCard";
+import CartSummary from "@/components/CartSummary";
+import Footer from "@/components/Footer";
 
 // const TAGS = ['Best Selling', 'New Arrival', 'Recommended', 'Childrens Items', 'Popular Items'];
 const SORT_OPTIONS = {
@@ -27,6 +31,9 @@ const SORT_OPTIONS = {
   PRICE_ASC: 'Price: Low to High',
   PRICE_DESC: 'Price: High to Low',
 };
+
+
+
 
 export const ProductCard = React.memo(({ product }) => {
   const { toggleWishList, wishlistIds, toggleCart, cartItems, updateCartQty } = useFirebase();
@@ -40,120 +47,7 @@ export const ProductCard = React.memo(({ product }) => {
 
   return (
     <>
-    <Helmet>
-      <title>Shop Crackers Online | SPT Crackers Sivakasi</title>
-      <meta name="description" content="Explore our wide collection of fireworks including ground chakkars, sparklers, rockets, and more. All at unbeatable Sivakasi prices." />
-      <meta name="keywords" content="crackers shop, buy fireworks, diwali crackers online, sivakasi fireworks, sparklers, rockets, flower pots, crackers deals" />
-      
-      <meta property="og:title" content="Shop Crackers at Cheapest Price from Sivakasi" />
-      <meta property="og:description" content="Premium Sivakasi crackers at wholesale price. Shop safe and eco-friendly fireworks online now!" />
-      <meta property="og:image" content="/meta/shop-banner.jpg" />
-      <meta property="og:url" content="https://sptcrackers.com/shop" />
-    </Helmet>
-     
-    <div className="bg-white rounded-xl shadow hover:shadow-md transition p-4 flex flex-col">
-        <img
-          src={productImages[0]}
-          alt={product.productName}
-          className="rounded-md h-[250px] w-full object-cover mb-3 cursor-pointer"
-          onClick={() => setShowZoom(true)}
-        />
-
-        <div className="text-center mb-2">
-          <p className="text-sm text-gray-500">{product.productName}</p>
-        </div>
-        <div className="text-center mb-2">
-          <span className="text-red-500 line-through">₹{product.beforeDiscPrice?.toFixed(2)} </span>
-          <span className="text-emerald-600 font-bold mr-2">₹{product.salesPrice?.toFixed(2)} </span>
-        </div>
-        <div className="mt-auto flex justify-between items-center">
-          {product.youtubeURL && (
-            <button>
-              <FaYoutube className="text-red-500 text-3xl cursor-pointer" />
-            </button>
-          )}
-
-          {qty > 0 ? (
-            <div className="flex items-center mx-auto gap-2">
-              <button
-                onClick={() => updateCartQty(product.productId, "dec")}
-                className="px-2 py-1 bg-red-500 text-white rounded"
-              >
-                −
-              </button>
-              <input
-                type="number"
-                min={1}
-                value={qty}
-                onChange={(e) => updateCartQty(product.productId, parseInt(e.target.value))}
-                className="w-16 text-center border rounded px-2 py-1"
-              />
-              <button
-                onClick={() => updateCartQty(product.productId, "inc")}
-                className="px-2 py-1 bg-green-500 text-white rounded"
-              >
-                +
-              </button>
-            </div>
-          ) : (
-            <Button
-              className="bg-green-500 text-white px-6 py-2 rounded-full mx-auto"
-              onClick={() => toggleCart(product)}
-            >
-              Add To Cart
-            </Button>
-          )}
-
-          <button
-            onClick={() => {
-              toggleWishList(product.id);
-              toast.success(isInWishlist ? 'Product is removed from wishlist' : 'Product is added to wishlist');
-            }}
-          >
-            {isInWishlist ? <FaHeart className="text-2xl text-red-500" /> : <CiHeart className="text-3xl" />}
-          </button>
-        </div>
-      </div>
-
-      {/* ✅ Zoom Dialog with Slider */}
-      {showZoom && (
-        <div
-          className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center"
-          onClick={() => setShowZoom(false)}
-        >
-          <div
-            className="relative bg-white p-2 rounded-md max-w-[90%] max-h-[90%] flex flex-col items-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Image Slider */}
-            <img
-              src={productImages[activeImage]}
-              alt={`Zoom ${product.productName}`}
-              className="max-h-[80vh] object-contain rounded mb-2"
-            />
-            {productImages.length > 1 && (
-              <div className="flex gap-2 mt-1">
-                {productImages.map((img, idx) => (
-                  <img
-                    key={idx}
-                    src={img}
-                    alt={`Thumb ${idx}`}
-                    onClick={() => setActiveImage(idx)}
-                    className={`w-14 h-14 object-cover rounded border cursor-pointer ${activeImage === idx ? 'border-green-500' : 'border-gray-300'}`}
-                  />
-                ))}
-              </div>
-            )}
-
-            <button
-              onClick={() => setShowZoom(false)}
-              className="absolute top-2 right-2 bg-black text-white px-2 py-1 text-sm rounded-full"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
+      <ProductCardComponent product={product} />
     </>
   );
 
@@ -309,13 +203,20 @@ const Shop = () => {
   const { searchTerm, products,TAGS } = useFirebase();
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filteredproducts, setFilteredproducts] = useState([]);
-  const [viewMode, setViewMode] = useState('grid');
+  // const [viewMode, setViewMode] = useState('grid');
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState<string>('DEFAULT'); // NEW
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tagFromURL = searchParams.get('tag');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
+  const handleViewChange = (mode: 'grid' | 'list') => {
+    setSearchParams({ view: mode });
+  };
+ 
   const totalPages = Math.ceil(filteredproducts.length / itemsPerPage);
 
   const paginatedProducts = useMemo(() => {
@@ -327,8 +228,20 @@ const Shop = () => {
     const delay = setTimeout(() => {
       setDebouncedSearch(searchTerm.toLowerCase());
     }, 300);
+  
+    const mode = searchParams.get('view');
+    if (mode === 'list' || mode === 'grid') {
+      setViewMode(mode);
+    }
+  
     return () => clearTimeout(delay);
-  }, [searchTerm]);
+  }, [searchTerm, searchParams]); // ✅ Combined dependencies
+
+  useEffect(() => {
+    if (tagFromURL && !selectedTags.includes(tagFromURL)) {
+      setSelectedTags(prev => [...prev, tagFromURL]);
+    }
+  }, [tagFromURL]);
 
   useEffect(() => {
     let filtered = products.filter(p =>
@@ -340,10 +253,12 @@ const Shop = () => {
     );
 
     if (selectedTags.length > 0) {
-      filtered = filtered.filter(p =>
-        selectedTags.some(tag => p.tag?.toLowerCase().includes(tag.toLowerCase()))
-      );
-    }
+    filtered = filtered.filter(p =>
+      selectedTags.some(tag =>
+        p.tag?.toLowerCase().includes(tag.toLowerCase())
+      )
+    );
+  }
 
     // 🔁 Sorting logic
    switch (sortOption) {
@@ -420,7 +335,18 @@ const Shop = () => {
   };
 
   return (
+    <>
     <div className="min-h-screen px-4 md:px-10 py-10 bg-gray-50">
+        <Helmet>
+          <title>Shop Crackers Online | SPT Crackers Sivakasi</title>
+          <meta name="description" content="Explore our wide collection of fireworks including ground chakkars, sparklers, rockets, and more. All at unbeatable Sivakasi prices." />
+          <meta name="keywords" content="crackers shop, buy fireworks, diwali crackers online, sivakasi fireworks, sparklers, rockets, flower pots, crackers deals" />
+          <meta property="og:title" content="Shop Crackers at Cheapest Price from Sivakasi" />
+          <meta property="og:description" content="Premium Sivakasi crackers at wholesale price. Shop safe and eco-friendly fireworks online now!" />
+          <meta property="og:image" content="/meta/shop-banner.jpg" />
+          <meta property="og:url" content="https://sptcrackers.com/shop" />
+        </Helmet>
+      <CartSummary/>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 overflow-y-auto">
         <div className="flex items-center gap-3 flex-wrap overflow-y-auto">
           <Drawer>
@@ -480,10 +406,10 @@ const Shop = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => setViewMode('grid')} className={`border p-2 rounded ${viewMode === 'grid' ? 'bg-emerald-200' : 'bg-white'}`}>
+          <button onClick={() => handleViewChange('grid')} className={`border p-2 rounded ${viewMode === 'grid' ? 'bg-emerald-200' : 'bg-white'}`}>
             <FaThLarge />
           </button>
-          <button onClick={() => setViewMode('table')} className={`border p-2 rounded ${viewMode === 'table' ? 'bg-emerald-200' : 'bg-white'}`}>
+          <button onClick={() => handleViewChange('list')} className={`border p-2 rounded ${viewMode === 'table' ? 'bg-emerald-200' : 'bg-white'}`}>
             <FaTable />
           </button>
         </div>
@@ -539,7 +465,8 @@ const Shop = () => {
       )}
 
     </div>
-    
+  <Footer />
+  </>
   );
 };
 

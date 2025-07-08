@@ -16,7 +16,7 @@ const AboutUs = () => {
         <meta property="og:title" content="About Us - SPT Crackers Sivakasi" />
         <meta property="og:description" content="We are a leading cracker supplier based in Sivakasi, offering quality fireworks at unbeatable prices." />
         <meta property="og:image" content="/meta/about-us.jpg" />
-        <meta property="og:url" content="https://sptcrackers.com/about" />
+        <meta property="og:url" content="https://sptcrackers.com/aboutus" />
       </Helmet>
      <section className="bg-white py-16 px-6 md:px-20">
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-start">

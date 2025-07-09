@@ -196,12 +196,17 @@ const Admin = () => {
     );
   
     const fullHtml = `
-      <!DOCTYPE html>
       <html>
         <head>
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <title>Order ${selectedOrder.orderId}</title>
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+           
+          </script>
           <style>
             * {
               box-sizing: border-box;
@@ -242,7 +247,7 @@ const Admin = () => {
             }
           </style>
         </head>
-        <body onload="window.print(); window.close();">
+        <body>
           ${htmlContent}
         </body>
       </html>
@@ -252,6 +257,7 @@ const Admin = () => {
     printWindow.document.write(fullHtml);
     printWindow.document.close();
   };
+  
 
   const handleShareOrderDetails = async () => {
     if (navigator.share) {
@@ -496,13 +502,13 @@ const handelRemoveProduct = (productToRemove) => {
                     <FaPrint />
                     Print
                   </button>
-                  <button
+                  {/* <button
                     onClick={handleShareOrderDetails}
                     className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2"
                   >
                     <FaShare />
                     Share
-                  </button>
+                  </button> */}
                 </div>
               </div> 
           <div>

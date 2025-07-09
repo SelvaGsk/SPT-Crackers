@@ -3,7 +3,7 @@ import AdminProduct, { AddProductToShop, EditProduct } from "@/components/AdminP
 import { Button } from "@/components/ui/button";
 import { useFirebase } from "@/Services/context";
 import { ArrowRight, Box, CheckCircle2, Package, Truck } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, React, useRef } from "react";
 import {
   FaPrint,
   FaCheckCircle,
@@ -13,8 +13,12 @@ import {
 import { MdDeleteForever } from "react-icons/md";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { createRoot } from 'react-dom/client';
+import OrderDetailPrint  from "@/components/OrderDetailPrint";
+import { printElement } from "@/components/utility/PrintUtility";
+import { renderToStaticMarkup } from "react-dom/server";
 
 const Admin = () => {
   const [orders, setOrders] = useState([]);
@@ -30,8 +34,18 @@ const Admin = () => {
   });
   const { getCustomerOrders,setting,getupdateCustomerOrders,getBannerUrls } = useFirebase();
   const [toggle,setToggle] =useState(false);
-const [localSetting, setLocalSetting] = useState(null);
+  const [localSetting, setLocalSetting] = useState(null);
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
+  const printContainerRef = useRef<HTMLDivElement | null>(null);
+  const [printRoot, setPrintRoot] = useState<ReturnType<typeof createRoot> | null>(null);
+
+  useEffect(() => {
+    if (printContainerRef.current && !printRoot) {
+      const root = createRoot(printContainerRef.current);
+      setPrintRoot(root);
+    }
+  }, [printContainerRef.current]);
 
   useEffect(() => {
     const CustomerOrders = async () => {
@@ -183,65 +197,111 @@ const [localSetting, setLocalSetting] = useState(null);
     }));
   };
 
+  const handlePrintOrderDetails = () => {
+    if (!selectedOrder || !setting) return;
+  
+    const printWindow = window.open("", "_blank", "width=800,height=600");
+    if (!printWindow) return;
+  
+    // Convert your React component to static HTML
+    const htmlContent = renderToStaticMarkup(
+      <OrderDetailPrint order={selectedOrder} setting={setting} />
+    );
+  
+    // Compose full printable HTML
+    const fullHtml = `
+      <html>
+        <head>
+          <title>Order ${selectedOrder.orderId}</title>
+          <meta charset="UTF-8" />
+          <style>
+            @media print {
+              body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+            }
+          </style>
+        </head>
+        <body onload="window.print()">
+          ${htmlContent}
+        </body>
+      </html>
+    `;
+  
+    printWindow.document.open();
+    printWindow.document.write(fullHtml);
+    printWindow.document.close();
+  };
+    // const newWindow = window.open("", "_blank", "width=900,height=650");
+    // if (!newWindow) return;
+  
+    // newWindow.document.write(`
+    //   <html>
+    //     <head>
+    //       <title>Estimation</title>
+    //       <style>
+    //         body { font-family: Arial, sans-serif; padding: 20px; color: #000; }
+    //         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    //         th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 14px; }
+    //         th { background-color: #f2f2f2; }
+    //       </style>
+    //     </head>
+    //     <body>
+    //       ${printContent.innerHTML}
+    //     </body>
+    //   </html>
+    // `);
+  
+    // newWindow.document.close();
+    // newWindow.onload = () => {
+    //   newWindow.focus();
+    //   setTimeout(() => {
+    //     newWindow.print();
+    //   }, 500);
+    // };
+  // };
 
   const handlePrint = () => {
-    const printContent = document.getElementById('print-section');
+    const printContent = document.getElementById("print-section");
     if (!printContent) return;
   
-    const newWindow = window.open('', '', 'width=900,height=650');
-    if (newWindow) {
-      newWindow.document.write(`
-        <html>
-          <head>
-            <title> Order List Report</title>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-              th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-              th { background-color: #f2f2f2; }
-            </style>
-          </head>
-          <body>
-            <h2>Customer Orders Report</h2>
-            ${printContent.innerHTML}
-          </body>
-        </html>
-      `);
-      newWindow.document.close();
-      newWindow.focus();
-      newWindow.print();
-      newWindow.close();
-    }
-  };
-
-  const handlePrintOrderDetails = () => {
-    const printContent = document.getElementById('order-print');
-    if (!printContent) return;
+    const newWindow = window.open("", "_blank", "width=900,height=650");
+    if (!newWindow) return;
   
-    const newWindow = window.open('', '', 'width=900,height=650');
-    if (newWindow) {
-      newWindow.document.write(`
-        <html>
-          <head>
-            <title>Order Details</title>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              h2, h3 { margin-bottom: 10px; }
-              ul { margin-top: 10px; }
-              li { margin-bottom: 5px; }
-            </style>
-          </head>
-          <body>
-            ${printContent.innerHTML}
-          </body>
-        </html>
-      `);
-      newWindow.document.close();
+    newWindow.document.write(`
+      <html>
+        <head>
+          <title>Order List Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; color: #000; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 14px; }
+            th { background-color: #f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <h2 style="text-align: center;">Customer Orders Report</h2>
+          ${printContent.innerHTML}
+          <p style="text-align:center; margin-top: 20px;">If print dialog does not appear, use your browser's menu to print manually.</p>
+        </body>
+      </html>
+    `);
+  
+    newWindow.document.close();
+  
+    // Wait for newWindow to load content before calling print
+    newWindow.onload = () => {
       newWindow.focus();
-      newWindow.print();
-      newWindow.close();
-    }
+  
+      // Try to print after slight delay for better mobile compatibility
+      setTimeout(() => {
+        newWindow.print();
+      }, 1000); // Can increase to 1000ms if needed
+    };
   };
+   
+  
 const statusSteps = [
   { key: "orderPlaced", label: "Order Placed", icon: <Box /> },
   { key: "payment", label: "Payment", icon: <Package /> },
@@ -288,11 +348,14 @@ const handelRemoveProduct = (productToRemove) => {
   return
 }
 
-
   return (
+    <>
+    <div style={{ display: "none" }}>
+      <div ref={printContainerRef} id="pdf-render-container" />
+    </div>
     <div className="p-6 max-w-7xl mx-auto">
        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-          <h1 className="text-3xl font-bold text-gray-800">Customer Orders</h1>
+          <h1 className="text-3xl font-bold text-gray-800">Customers Orders</h1>
           <button
             onClick={handlePrint}
             className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2 w-full sm:w-auto justify-center"
@@ -334,7 +397,7 @@ const handelRemoveProduct = (productToRemove) => {
               <table className="w-full text-sm text-left">
                 <thead className="bg-gray-100">
                   <tr>
-                    <th className="p-3">User Name</th>
+                    <th className="p-3">Customer Name</th>
                     <th className="p-3">Mobile Number</th>
                     <th className="p-3">Order Id</th>
                     <th className="p-3">Date</th>
@@ -399,9 +462,10 @@ const handelRemoveProduct = (productToRemove) => {
                   <FaPrint />
                   Print
                 </button>
+                
               </div>
 
-          <div id="order-print">
+          <div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             
               <div>
@@ -583,7 +647,7 @@ const handelRemoveProduct = (productToRemove) => {
       </div>
         )}
       </div>  
-    
+      </>
   );
 };
 

@@ -13,12 +13,10 @@ import {
 import { MdDeleteForever } from "react-icons/md";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
-import { createRoot } from 'react-dom/client';
 import OrderDetailPrint  from "@/components/OrderDetailPrint";
 import { printElement } from "@/components/utility/PrintUtility";
 import { renderToStaticMarkup } from "react-dom/server";
+import { FaShare } from "react-icons/fa6";
 
 const Admin = () => {
   const [orders, setOrders] = useState([]);
@@ -36,16 +34,6 @@ const Admin = () => {
   const [toggle,setToggle] =useState(false);
   const [localSetting, setLocalSetting] = useState(null);
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-  const printContainerRef = useRef<HTMLDivElement | null>(null);
-  const [printRoot, setPrintRoot] = useState<ReturnType<typeof createRoot> | null>(null);
-
-  useEffect(() => {
-    if (printContainerRef.current && !printRoot) {
-      const root = createRoot(printContainerRef.current);
-      setPrintRoot(root);
-    }
-  }, [printContainerRef.current]);
 
   useEffect(() => {
     const CustomerOrders = async () => {
@@ -203,18 +191,49 @@ const Admin = () => {
     const printWindow = window.open("", "_blank", "width=800,height=600");
     if (!printWindow) return;
   
-    // Convert your React component to static HTML
     const htmlContent = renderToStaticMarkup(
       <OrderDetailPrint order={selectedOrder} setting={setting} />
     );
   
-    // Compose full printable HTML
     const fullHtml = `
+      <!DOCTYPE html>
       <html>
         <head>
-          <title>Order ${selectedOrder.orderId}</title>
           <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Order ${selectedOrder.orderId}</title>
           <style>
+            * {
+              box-sizing: border-box;
+            }
+            body {
+              font-family: Arial, sans-serif;
+              padding: 20px;
+              color: #000;
+            }
+            h1, h2, h3, h4 {
+              margin: 0;
+              padding: 0;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 16px;
+              font-size: 14px;
+            }
+            th, td {
+              border: 1px solid #ccc;
+              padding: 8px;
+            }
+            th {
+              background-color: #f2f2f2;
+            }
+            .text-right {
+              text-align: right;
+            }
+            .text-left {
+              text-align: left;
+            }
             @media print {
               body {
                 -webkit-print-color-adjust: exact;
@@ -223,7 +242,7 @@ const Admin = () => {
             }
           </style>
         </head>
-        <body onload="window.print()">
+        <body onload="window.print(); window.close();">
           ${htmlContent}
         </body>
       </html>
@@ -233,6 +252,23 @@ const Admin = () => {
     printWindow.document.write(fullHtml);
     printWindow.document.close();
   };
+
+  const handleShareOrderDetails = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Order - ${selectedOrder.orderId}`,
+          text: `View your order from SPT Crackers`,
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.error("Share failed:", err);
+      }
+    } else {
+      alert("Sharing is not supported on this device.");
+    }
+  };
+  
     // const newWindow = window.open("", "_blank", "width=900,height=650");
     // if (!newWindow) return;
   
@@ -350,9 +386,6 @@ const handelRemoveProduct = (productToRemove) => {
 
   return (
     <>
-    <div style={{ display: "none" }}>
-      <div ref={printContainerRef} id="pdf-render-container" />
-    </div>
     <div className="p-6 max-w-7xl mx-auto">
        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
           <h1 className="text-3xl font-bold text-gray-800">Customers Orders</h1>
@@ -455,16 +488,23 @@ const handelRemoveProduct = (productToRemove) => {
               
               <div className="flex justify-between items-center mb-4">
                 <Button onClick={()=>updateOrder()}>Save</Button>
-                <button
-                  onClick={handlePrintOrderDetails}
-                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2 print:hidden"
-                >
-                  <FaPrint />
-                  Print
-                </button>
-                
-              </div>
-
+                <div className="print:hidden flex gap-2 justify-end mb-2">
+                  <button
+                    onClick={handlePrintOrderDetails}
+                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2"
+                  >
+                    <FaPrint />
+                    Print
+                  </button>
+                  <button
+                    onClick={handleShareOrderDetails}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2"
+                  >
+                    <FaShare />
+                    Share
+                  </button>
+                </div>
+              </div> 
           <div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             

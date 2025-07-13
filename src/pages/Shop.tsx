@@ -356,6 +356,16 @@ const Shop = () => {
     return pages;
   };
 
+  const groupedProducts = useMemo(() => {
+    const groups: { [key: string]: any[] } = {};
+    paginatedProducts.forEach((product) => {
+      const category = product.CategoryName || 'Others';
+      if (!groups[category]) groups[category] = [];
+      groups[category].push(product);
+    });
+    return groups;
+  }, [paginatedProducts]);
+
   return (
     
     <>
@@ -455,38 +465,85 @@ const Shop = () => {
       </div>
 
       {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-          {paginatedProducts.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      ) : (
-          <div className="w-full">
-          <div className="inline-block min-w-full align-middle bg-white rounded shadow">
-            <table className="w-full table-fixed sm:table-auto text-left text-sm">
-              
-              {/* ✅ Hide header on mobile */}
-              <thead className="hidden sm:table-header-group bg-gray-100 uppercase text-xs">
-                <tr>
-                  <th className="p-2 w-[30px] lg:w-[120px]">Image</th>
-                  <th className="p-2 w-[60px] lg:w-[120px]">Name</th>
-                  <th className="p-2 w-[30px] lg:w-[100px]">MRP</th>
-                  <th className="p-2 w-[30px] lg:w-[100px]">Offer Rate</th>
-                  <th className="p-2 w-[30px] lg:w-[100px]">Cart</th>
-                </tr>
-              </thead>
-        
-              <tbody>
-                {paginatedProducts.map((product, i) => (
-                  <ProductTableRow key={i} product={product} />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      
-      )}
+            groupedProducts ? (
+              <>
+                {Object.entries(groupedProducts).map(([category, items]) => (
+                  <div key={category} className="mb-8">
+                    {/* Category Heading */}
+                    <div className="mb-3">
+                      <div className="hidden sm:inline-block bg-emerald-100 text-emerald-800 text-sm font-semibold px-4 py-1 rounded-full shadow-sm border border-emerald-200">
+                        {category}
+                      </div>
+                      <div className="block sm:hidden bg-emerald-50 border-b">
+                        <div className="inline-block bg-emerald-100 text-emerald-800 text-sm font-semibold px-4 py-1 rounded-full shadow-sm border border-emerald-200">
+                          {category}
+                        </div>
+                      </div>
+                    </div>
 
+                    {/* Grid of Products */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {items.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <p className="text-center text-sm text-gray-500">Loading...</p>
+            )
+          ) : (
+            <div className="w-full">
+              <div className="inline-block min-w-full align-middle bg-white rounded shadow">
+                <table className="w-full table-fixed sm:table-auto text-left text-sm">
+                  <thead className="hidden sm:table-header-group bg-gray-100 uppercase text-xs">
+                    <tr>
+                      <th className="p-2 w-[30px] lg:w-[120px]">Image</th>
+                      <th className="p-2 w-[60px] lg:w-[120px]">Name</th>
+                      <th className="p-2 w-[30px] lg:w-[100px]">MRP</th>
+                      <th className="p-2 w-[30px] lg:w-[100px]">Offer Rate</th>
+                      <th className="p-2 w-[30px] lg:w-[100px]">Cart</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {groupedProducts ? (
+                      Object.entries(groupedProducts).map(([category, products]) => (
+                        <React.Fragment key={category}>
+                          <tr className="hidden sm:table-row bg-emerald-50">
+                            <td colSpan={5} className="px-4 py-2">
+                              <div className="inline-block bg-emerald-100 text-emerald-800 text-sm font-semibold px-4 py-1 rounded-full shadow-sm border border-emerald-200">
+                                {category}
+                              </div>
+                            </td>
+                          </tr>
+
+                          <tr className="block sm:hidden bg-emerald-50 border-b">
+                            <td className="p-3">
+                              <div className="inline-block bg-emerald-100 text-emerald-800 text-sm font-semibold px-4 py-1 rounded-full shadow-sm border border-emerald-200">
+                                {category}
+                              </div>
+                            </td>
+                          </tr>
+
+                          {products.map((product) => (
+                            <ProductTableRow key={product.id} product={product} />
+                          ))}
+                        </React.Fragment>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="text-center text-gray-500 py-6">
+                          Loading products...
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+ 
       {totalPages > 1 && (
         <Pagination className="mt-6 justify-center">
           <PaginationContent>

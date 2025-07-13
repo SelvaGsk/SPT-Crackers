@@ -1,14 +1,19 @@
 import * as functions from 'firebase-functions'; // for WhatsApp (v2 style)
 import * as functionsV1 from 'firebase-functions/v1'; // for Realtime DB (v1 style)
-
 import * as admin from 'firebase-admin';
+import * as puppeteer from "puppeteer";
+import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
+import corsLib from "cors";
+const cors = corsLib({ origin: true });
 
 const token = functions.config().whatsapp.token;
 const phoneId = functions.config().whatsapp.phone_id;
 const ownerNumber = functions.config().whatsapp.owner;
 
+
 admin.initializeApp();
+const bucket = admin.storage().bucket();
 
 interface WhatsAppPayload {
   customerNumber: string;
@@ -42,6 +47,40 @@ export const notifyAdminsOnOrder = functionsV1.database
 
     return null;
   });
+
+  export const generatePdf = functions.https.onRequest((req, res) => {
+    cors(req, res, async () => {
+      try {
+        const { html, fileName } = req.body;
+        if (!html || !fileName) return res.status(400).send("Missing html or fileName");
+  
+        const browser = await puppeteer.launch({
+          headless: true,
+          args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        });
+  
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: "networkidle0" });
+  
+        const pdfBuffer = await page.pdf({
+          format: "a4",
+          printBackground: true,
+        });
+  
+        await browser.close();
+  
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+        res.send(pdfBuffer);
+      } catch (error) {
+        console.error("PDF generation failed:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+  });
+  
+  
+  
 
   // export const sendWhatsAppMessage = functions
   // .https.onCall(async (data, context) => {

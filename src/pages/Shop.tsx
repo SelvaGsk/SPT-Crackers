@@ -200,17 +200,19 @@ export const ProductTableRow = React.memo(({ product }) => {
 
 
 const Shop = () => {
-  const { searchTerm, products,TAGS } = useFirebase();
+  const { searchTerm, products,TAGS, Categories } = useFirebase();
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filteredproducts, setFilteredproducts] = useState([]);
   // const [viewMode, setViewMode] = useState('grid');
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState<string>('DEFAULT'); // NEW
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
   const [searchParams, setSearchParams] = useSearchParams();
   const tagFromURL = searchParams.get('tag');
+  const categoryFromURL = searchParams.get('category');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const handleViewChange = (mode: 'grid' | 'list') => {
@@ -243,6 +245,13 @@ const Shop = () => {
     }
   }, [tagFromURL]);
 
+
+  useEffect(() => {
+    if (categoryFromURL && !selectedCategories.includes(categoryFromURL)) {
+      setSelectedCategories(prev => [...prev, categoryFromURL]);
+    }
+  }, [categoryFromURL]);
+  
   useEffect(() => {
     let filtered = products.filter(p =>
       p?.productName?.toLowerCase().includes(debouncedSearch)
@@ -257,6 +266,13 @@ const Shop = () => {
       selectedTags.some(tag =>
         p.tag?.toLowerCase().includes(tag.toLowerCase())
       )
+    );
+  }
+
+   // 4. Category filter
+   if (selectedCategories.length > 0) {
+    filtered = filtered.filter(p =>
+      selectedCategories.includes(p.CategoryName)
     );
   }
 
@@ -281,11 +297,17 @@ const Shop = () => {
 
     setFilteredproducts(filtered);
     setCurrentPage(1);
-  }, [debouncedSearch, products, priceRange, selectedTags, sortOption]);
+  }, [debouncedSearch, products, priceRange, selectedTags, sortOption, selectedCategories]);
 
   const toggleTag = (tag: string) => {
     setSelectedTags(prev =>
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const toggleCategory = (category: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]
     );
   };
 
@@ -335,6 +357,7 @@ const Shop = () => {
   };
 
   return (
+    
     <>
     <div className="min-h-screen px-4 md:px-10 py-10 bg-gray-50">
         <Helmet>
@@ -347,6 +370,7 @@ const Shop = () => {
           <meta property="og:url" content="https://sptcrackers.com/shop" />
         </Helmet>
       <CartSummary/>
+
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 overflow-y-auto">
         <div className="flex items-center gap-3 flex-wrap overflow-y-auto">
           <Drawer>
@@ -395,6 +419,21 @@ const Shop = () => {
                       >
                         {label}
                       </Button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h2 className="font-semibold text-lg">Categories</h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-2">
+                    {Categories.map((category) => (
+                      <button
+                        key={category}
+                        onClick={() => toggleCategory(category)}
+                        className={`rounded-xl px-4 py-2 text-sm font-medium shadow-sm transition-colors border 
+                          ${selectedCategories.includes(category) ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white text-gray-800 hover:bg-gray-100'}`}
+                      >
+                        {category}
+                      </button>
                     ))}
                   </div>
                 </div>

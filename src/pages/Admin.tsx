@@ -259,19 +259,55 @@ const Admin = () => {
   };
   
 
-  const handleShareOrderDetails = async () => {
-    if (navigator.share) {
+  const handleGenerateAndSharePDF = async () => {
+    const html = renderToStaticMarkup(
+      <OrderDetailPrint order={selectedOrder} setting={setting} />
+    );
+  
+    const response = await fetch(
+      "https://us-central1-spt-crackers.cloudfunctions.net/generatePdf",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          html,
+          fileName: `Order-${selectedOrder.orderId}`,
+        }),
+      }
+    );
+  
+    if (!response.ok) {
+      toast.error("Failed to generate PDF");
+      return;
+    }
+  
+    const blob = await response.blob();
+    const pdfFile = new File([blob], `Order-${selectedOrder.orderId}.pdf`, {
+      type: "application/pdf",
+    });
+  
+    if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
       try {
         await navigator.share({
-          title: `Order - ${selectedOrder.orderId}`,
-          text: `View your order from SPT Crackers`,
-          url: window.location.href,
+          title: "Order Copy",
+          text: `Order ID: ${selectedOrder.orderId}`,
+          files: [pdfFile],
         });
       } catch (err) {
-        console.error("Share failed:", err);
+        console.error("Sharing failed", err);
+        toast.error("Sharing cancelled or failed");
       }
     } else {
-      alert("Sharing is not supported on this device.");
+      // fallback for unsupported devices
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = pdfFile.name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.info("File downloaded. Sharing not supported on this device.");
     }
   };
   
@@ -502,13 +538,13 @@ const handelRemoveProduct = (productToRemove) => {
                     <FaPrint />
                     Print
                   </button>
-                  {/* <button
-                    onClick={handleShareOrderDetails}
+                  <button
+                    onClick={handleGenerateAndSharePDF}
                     className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2"
                   >
                     <FaShare />
                     Share
-                  </button> */}
+                  </button>
                 </div>
               </div> 
           <div>

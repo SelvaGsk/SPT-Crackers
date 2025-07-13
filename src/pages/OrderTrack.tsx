@@ -191,7 +191,12 @@ const OrderTrack = () => {
                             Pending verification
                           </span>
                         )}
-                        {isShippedStep && selectedOrder.lrNumber && (
+                        {isShippedStep && selectedOrder.transportName && (
+                          <span className="text-xs text-orange-500 mt-1">
+                            Transport Name: {selectedOrder.transportName}
+                          </span>
+                        )}
+                         {isShippedStep && selectedOrder.lrNumber && (
                           <span className="text-xs text-orange-500 mt-1">
                             LR: {selectedOrder.lrNumber}
                           </span>

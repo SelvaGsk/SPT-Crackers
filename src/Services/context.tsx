@@ -63,6 +63,7 @@ interface FirebaseContextType {
   userloading:any;
   setdbUser: React.Dispatch<React.SetStateAction<any>>;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+  Categories:any;
 }
 
 
@@ -83,6 +84,7 @@ export const FirebaseProvider = ({ children }: FirebaseProviderProps) => {
   const [products, setProducts] = useState([]);
   const [setting,setSetting]=useState();
   const [TAGS,setTags]=useState();
+  const [Categories,setCategories]=useState();
   const [loading, setLoading] = useState(false);
   const [dbuser, setdbUser] = useState(null);
 
@@ -152,6 +154,28 @@ export const FirebaseProvider = ({ children }: FirebaseProviderProps) => {
 
     return () => unsubscribe();
   },[])
+
+  useEffect(() => {
+    const CategoriesRef = ref(database, "SPT/GeneralMaster/Product Group");
+    const unsubscribe = onValue(CategoriesRef, (snapshot) => {
+      const data = snapshot.val();
+      console.log("Categories data:", data); // for debug
+  
+      if (data) {
+        const categoryList = Object.values(data)
+          .map((item: any) => item?.generalName) // ✅ Corrected field
+          .filter(Boolean); // Remove undefined/null
+        console.log("Categories from Firebase:", categoryList); // ✅ Should show correct names
+        setCategories(categoryList);
+      } else {
+        setCategories([]);
+      }
+    });
+  
+    return () => unsubscribe();
+  }, []);
+
+  
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
@@ -508,7 +532,8 @@ const updateCartQty = async (
       setdbUser,
       userloading,
       getCustomerOrders,
-      getupdateCustomerOrders
+      getupdateCustomerOrders,
+      Categories
       
       }}
     >
